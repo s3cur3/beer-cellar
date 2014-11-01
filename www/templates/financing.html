@@ -1,0 +1,24 @@
+<ion-view title="Financing">
+    <ion-nav-buttons side="left">
+        <!--The menu button-->
+        <button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
+    </ion-nav-buttons>
+    <ion-content class="has-header">
+        <h1 class="content-pad">Financing Summary</h1>
+        <group label="Price & Down Payment">
+            <calculated-field label="Total Loan Amount">{{calc.getAllIn(property) | currency}}</calculated-field>
+            <calculated-field label="Down Payment ({{property.loan.downPaymentPercent}}%)">{{calc.getDownPayment(property) | currency}}</calculated-field>
+        </group>
+        <group label="Loan Information">
+            <text-field label="Loan Type" ng-model="property.loan.type"></text-field>
+            <text-field label="Loan Due Date" ng-model="property.loan.dueDate"></text-field>
+            <calculated-field label="Loan Amount">{{calc.getLoanAmount(property) | currency}}</calculated-field>
+            <number-field label="Interest Rate" ng-model="property.loan.interestRate" suffix="% per year"></number-field>
+            <number-field label="Term of Loan" ng-model="property.loan.termYears" suffix="years"></number-field>
+        </group>
+        <group label="Monthly Payment Summary">
+            <calculated-field label="Monthly Payment (Principal & Interest)">{{calc.getLoanPayment(property) | currency}}</calculated-field>
+            <calculated-field label="PITI (Principal, Interest, Tax, Insurance)">{{calc.getPITI(property) | currency}}</calculated-field>
+        </group>
+    </ion-content>
+</ion-view>

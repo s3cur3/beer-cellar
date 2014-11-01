@@ -1,0 +1,17 @@
+<ion-view title="Criteria">
+    <ion-nav-buttons side="left">
+        <button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
+    </ion-nav-buttons>
+    <ion-content class="has-header">
+        <h1 class="content-pad">Investment Targets</h1>
+
+        <div class="list small-number-inputs">
+            <number-field label="Cap Rate" ng-model="criteria.capRate" suffix="%"></number-field>
+            <number-field label="GRM" ng-model="criteria.grm"></number-field>
+            <number-field label="Cash Flow" ng-model="criteria.cashFlow" prefix="$"></number-field>
+            <number-field label="Cash-on-Cash ROI" ng-model="criteria.cashOnCashROI" suffix="%"></number-field>
+            <number-field label="LTV" ng-model="criteria.ltv" suffix="%"></number-field>
+            <number-field label="DSCR" ng-model="criteria.dscr" suffix="%"></number-field>
+        </div>
+    </ion-content>
+</ion-view>

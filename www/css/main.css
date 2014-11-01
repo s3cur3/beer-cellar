@@ -1,0 +1,148 @@
+
+h1.content-pad {
+    padding-top: 12px;
+    padding-bottom: 8px;
+    font-size: 30px;
+}
+
+p, div {
+    font-size: 16px;
+}
+
+input[type=color], input[type=date], input[type=datetime-local], input[type=datetime], input[type=email], input[type=month], input[type=number], input[type=password], input[type=search], input[type=tel], input[type=text], input[type=time], input[type=url], input[type=week], textarea {
+    font-size: 16px;
+}
+
+
+/** Forms **/
+.right {
+  text-align: right;
+}
+.right+.input-units {
+  padding-right: 15px;
+}
+.input-units.prefix {
+    text-align: right;
+}
+
+.list .input-label {
+  max-width: inherit;
+}
+.simulate-input {
+    padding-right: 10px;
+}
+
+.item .item-field {
+    float: right;
+}
+input[type=number].item-field {
+    max-width: 5em;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 0 220px;
+    -moz-box-flex: 1;
+    -moz-flex: 1 0 220px;
+    -ms-flex: 1 0 220px;
+    flex: 1 0 220px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+    height: 1.5em;
+    background-color: transparent;
+}
+
+input[type=text].item-field {
+    max-width: 50%;
+    text-align: right;
+    height: 1.5em;
+}
+
+
+/** Lists **/
+.spacer {
+  height: 40px;
+}
+.spacer.invisible {
+    border: none;
+}
+
+/** Buttons **/
+.button.dangerous {
+    font-size: 95%;
+    min-height: 35px;
+}
+
+/** Content wrappers **/
+.content-pad {
+  padding: 16px;
+}
+
+
+
+/** Utility classes **/
+.text-center {
+  text-align: center;
+}
+.hidden {
+    display: none !important;
+}
+
+
+
+
+
+
+/** Fix for tablets **/
+@media (min-width: 767px) {
+    .menu-content {
+        -webkit-transform: translate3d(270px, 0px, 0px) !important;
+        width: calc(100% - 270px) !important;
+    }
+
+    .bar-header button.ion-navicon {
+        display: none;
+    }
+}
+
+
+
+
+
+/** Color **/
+/*
+Carrot: #e67e22
+Wet asphalt (dark blue): #34495e
+Peter river (blue): #3498db
+Alizarin (red): #e74c3c
+*/
+h1 {
+    color: #34495e;
+}
+.bar.bar-stable {
+    border-bottom-width: 2px;
+    border-bottom-color: #3498db;
+}
+.bar.bar-stable, .bar.bar-stable .title {
+    color: #3498db;
+}
+/*
+.positive {
+    color: #3498db;
+}
+.button.button-positive {
+    background-color: #3498db;
+}*/
+.assertive {
+    color: #e74c3c;
+}
+.item-divider {
+    color: #fff;
+    background-color: #3498db;
+}
+.simulate-input, .simulate-input-container {
+    font-weight: bold;
+}
+

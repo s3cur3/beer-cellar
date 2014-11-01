@@ -1,0 +1,76 @@
+<ion-view title="Pro Forma">
+    <ion-nav-buttons side="left">
+        <!--The menu button-->
+        <button menu-toggle="left" class="button button-icon icon ion-navicon"></button>
+    </ion-nav-buttons>
+    <ion-content class="has-header" id="pro-forma">
+        <a class="item button button-full button-positive" ng-click="renderPDF()" ng-show="false">
+            Save as PDF
+        </a>
+        <h1 class="content-pad">Pro Forma</h1>
+        <calculated-field label="Property Name">{{property.basics.name}}</calculated-field>
+        <calculated-field label="Address">
+            {{property.basics.streetAddress}}<br>
+            {{property.basics.city}}, {{property.basics.state}} {{property.basics.zip}}
+        </calculated-field>
+        <number-field label="Total Square Footage" ng-model="property.basics.squareFootage"></number-field>
+        <calculated-field label="Property Name">{{calc.getAllIn(property)/property.basics.squareFootage | currency}}</calculated-field>
+
+        <group label="Income Summary">
+            <number-field label="Gross Rental Income" ng-model="property.income.grossMonthlyRentalIncome"></number-field>
+            <number-field label="Other Monthly Income" ng-model="property.income.otherMonthlyIncome" prefix="$"></number-field>
+            <calculated-field label="Vacancy Rate Loss ({{property.expenses.vacancyRateLoss}}%)">
+                {{-property.income.grossMonthlyRentalIncome * property.expenses.vacancyRateLoss/100 | currency}}
+            </calculated-field>
+            <calculated-field label="Gross Operating Income">
+                {{calc.getGrossOperatingIncome(property) | currency}}
+            </calculated-field>
+        </group>
+
+        <group label="Expense Summary">
+            <calculated-field label="Property Tax">
+                {{property.expenses.annualPropertyTax/12 | currency}}
+            </calculated-field>
+            <calculated-field label="Insurance">
+                {{property.expenses.annualInsurance/12 | currency}}
+            </calculated-field>
+            <calculated-field label="Property Management">
+                {{property.income.grossMonthlyRentalIncome * property.expenses.propertyManagementPercent/100 | currency}}
+            </calculated-field>
+            <calculated-field label="Other Expenses">
+                {{property.expenses.miscMonthlyExpenses | currency}}
+            </calculated-field>
+            <calculated-field label="Total Operating Expenses">
+                {{calc.getTotalOperatingExpenses(property) | currency}}
+            </calculated-field>
+
+            <div class="item spacer">
+            </div>
+
+            <calculated-field label="Net Operating Income">
+                {{calc.getNetOperatingIncome(property) | currency}}
+            </calculated-field>
+            <calculated-field label="Debt Service">
+                {{calc.getDebtService(property) | currency}}
+            </calculated-field>
+            <calculated-field label="Cash Flow">
+                {{calc.getCashFlow(property) | currency}}
+            </calculated-field>
+        </group>
+
+        <group label="Financing Summary">
+            <text-field label="Loan Type" ng-model="property.loan.type"></text-field>
+            <number-field label="Interest Rate" ng-model="property.loan.interestRate" suffix="% per year"></number-field>
+            <text-field label="Loan Due Date" ng-model="property.loan.dueDate"></text-field>
+            <calculated-field label="Loan Amount">
+                {{calc.getLoanAmount(property) | currency}}
+            </calculated-field>
+            <calculated-field label="Monthly Payment">
+                {{calc.getLoanPayment(property) | currency}}
+            </calculated-field>
+        </group>
+        <div class="item spacer">
+        </div>
+    </ion-content>
+
+</ion-view>

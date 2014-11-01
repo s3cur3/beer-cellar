@@ -1,0 +1,6 @@
+[submodule "www/lib/enums"]
+	path = www/lib/enums
+	url = https://github.com/rauschma/enums.git
+[submodule "www/lib/jsPDF"]
+	path = www/lib/jsPDF
+	url = https://github.com/MrRio/jsPDF.git

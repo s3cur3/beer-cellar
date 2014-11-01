@@ -1,0 +1,6 @@
+
+
+var appVersion = version.basic;
+
+
+
