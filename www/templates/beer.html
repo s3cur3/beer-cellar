@@ -1,0 +1,29 @@
+<ion-view title="{{beer.basics.name}}">
+    <ion-nav-buttons side="left">
+        <!--The menu button-->
+        <button menu-toggle="left" class="button button-icon icon ion-navicon menu-button"></button>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+        <a class="button button-clear button-positive" href="#/app/properties/{{beer.id}}/analysis">
+            Analyze
+        </a>
+    </ion-nav-buttons>
+    <ion-content class="has-header">
+        <h1 class="content-pad">Property Info</h1>
+        <div class="list">
+            <group label="Basic Info">
+                <text-field label="Name" ng-model="beer.name"></text-field>
+                <text-field label="Brewery" ng-model="beer.brewery"></text-field>
+                <number-field label="Purchased Price" ng-model="beer.purchasePrice" prefix="$"></number-field>
+                <text-field label="Purchase Date" ng-model="beer.purchaseDate"></text-field>
+            </group>
+
+            <div class="item spacer invisible">
+            </div>
+
+            <button class="item button button-full button-assertive dangerous" ng-click="delete(beer)">
+                Delete this beer
+            </button>
+        </div>
+    </ion-content>
+</ion-view>

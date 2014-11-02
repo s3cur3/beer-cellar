@@ -28,52 +28,23 @@ function hideOrShowBackBtn() {
 
 angular.module('BeerCellarApp.controllers', [])
 
-    .controller('AppCtrl', ['$scope', '$location', '$ionicModal', 'PropertyService', 'CalculatorService', 'CriteriaService', 'CameraFactory', function( $scope, $location, $ionicModal, PropertyService, CalculatorService, CriteriaService, CameraFactory ) {
-        // Set up property functionality
-        $scope.propertyService = PropertyService;
-        $scope.properties = PropertyService.allProperties();
-        $scope.property = $scope.properties[ PropertyService.getLastActiveIndex() ];
+    .controller('AppCtrl', ['$scope', '$location', '$ionicModal', 'BeerService', 'CameraFactory', function( $scope, $location, $ionicModal, BeerService, CameraFactory ) {
+        // Set up beer functionality
+        $scope.BeerService = BeerService;
+        $scope.beers = BeerService.allBeers();
+        $scope.beer = $scope.beers[ BeerService.getLastActiveIndex() ];
 
-        $scope.calc = CalculatorService;
-
-        $scope.criteria = CriteriaService.allCriteria();
-
-        $scope.makePropertiesListComplex = true;
-
-        $scope.selectProperty = function(prop, index) {
-            $scope.property = prop;
-            PropertyService.setLastActiveIndex(index || prop);
-        };
-
-        $scope.analysis = {
-            capRateGood: function(p) {
-                if(!p) p = $scope.property;
-                return $scope.calc.getCapRate(p) * 100 >= $scope.criteria.capRate;
-            },
-            cashFlowGood: function(p) {
-                if(!p) p = $scope.property;
-                return $scope.calc.getCashFlow(p) >= $scope.criteria.cashFlow;
-            },
-            dscrGood: function(p) {
-                if(!p) p = $scope.property;
-                return $scope.calc.getDSCR(p) > $scope.criteria.dscr;
-            },
-            grmGood: function(p) {
-                if(!p) p = $scope.property;
-                return $scope.calc.getGRM(p) < $scope.criteria.grm;
-            },
-            ltvGood: function(p) {
-                if(!p) p = $scope.property;
-                return $scope.calc.getLTV(p) * 100 < $scope.criteria.ltv;
-            }
+        $scope.selectBeer = function(prop, index) {
+            $scope.beer = prop;
+            BeerService.setLastActiveIndex(index || prop);
         };
 
         $scope.greenLight = function(p) {
-            if(!p) p = $scope.property;
+            if(!p) p = $scope.beer;
 
             var giveGreenLight = true;
             for( var fn in $scope.analysis ) {
-                if( $scope.analysis.hasOwnProperty(fn) ) {
+                if( $scope.analysis.hasOwnBeer(fn) ) {
                     giveGreenLight &= $scope.analysis[fn](p);
                 }
             }
@@ -89,15 +60,15 @@ angular.module('BeerCellarApp.controllers', [])
             $scope.deleteModal = modal;
         });
 
-        // Tools for deleting a property
+        // Tools for deleting a beer
         $scope.delete = function(p) {
-            $scope.propertyToDelete = p;
+            $scope.beerToDelete = p;
             $scope.deleteModal.show();
         };
         $scope._delete = function() {
             $scope.deleteModal.hide();
-            PropertyService.delete($scope.propertyToDelete);
-            $location.path('/properties');
+            BeerService.delete($scope.beerToDelete);
+            $location.path('/beers');
         };
         $scope.closeDelete = function() {
             $scope.deleteModal.hide();
@@ -115,113 +86,56 @@ angular.module('BeerCellarApp.controllers', [])
                 $scope.editable = null;
         };
 
-        // Update the master property list whenever we modify this property
-        $scope.$watch('property', function(updatedProperty, oldProperty) {
-            if( typeof updatedProperty == "object" && updatedProperty ) {
-                PropertyService.save(updatedProperty);
-                $scope.properties = PropertyService.allProperties();
+        // Update the master beer list whenever we modify this beer
+        $scope.$watch('beer', function(updatedBeer, oldBeer) {
+            if( typeof updatedBeer == "object" && updatedBeer ) {
+                BeerService.save(updatedBeer);
+                $scope.beers = BeerService.allBeers();
             } else {
-                console.log("Got empty property in an update...?");
-            }
-        }, true);
-
-        // Update the master criteria list whenever we modify this property
-        $scope.$watch('criteria', function(updatedCriteria, oldCriteria) {
-            if( typeof updatedCriteria == "object" && updatedCriteria ) {
-                console.log("Saving criteria:", updatedCriteria);
-                CriteriaService.save(updatedCriteria);
-                $scope.criteria = CriteriaService.allCriteria();
-            } else {
-                console.error("Got empty criteria list in an update...?");
+                console.log("Got empty beer in an update...?");
             }
         }, true);
     }])
 
-
-    .controller('CriteriaCtrl', ['$scope', 'CriteriaService', function($scope, CriteriaService) {
-        console.log("In CriteriaCtrl");
-        hideOrShowBackBtn();
-    }])
-
-    .controller('PropertiesCtrl', ['$scope', '$location', 'PropertyService', function($scope, $location, PropertyService) {
-        console.log("In PropertiesCtrl");
+    .controller('BeersCtrl', ['$scope', '$location', 'BeerService', function($scope, $location, BeerService) {
+        console.log("In BeersCtrl");
         hideOrShowBackBtn();
 
-        $scope.properties = PropertyService.allProperties();
-        if( $scope.properties.length == 0 ) {
-            $scope.property = PropertyService.newProperty();
-            $scope.properties = PropertyService.allProperties();
+        $scope.beers = BeerService.allBeers();
+        if( $scope.beers.length == 0 ) {
+            $scope.beer = BeerService.newBeer();
+            $scope.beers = BeerService.allBeers();
         }
 
-        $scope.addProperty = function() {
-            console.log("Adding property");
-            var p = PropertyService.newProperty();
-            $scope.properties = PropertyService.allProperties();
-            $scope.selectProperty(p);
+        $scope.addBeer = function() {
+            console.log("Adding beer");
+            var b = BeerService.newBeer();
+            $scope.beers = BeerService.allBeers();
+            $scope.selectBeer(b);
 
-            console.log("Setting path to " + '/properties/' + PropertyService.getLastActiveIndex());
-            $location.path('/#/properties/' + PropertyService.getLastActiveIndex());
+            console.log("Setting path to " + '/beers/' + BeerService.getLastActiveIndex());
+            $location.path('/#/beers/' + BeerService.getLastActiveIndex());
         }
     }])
 
-    .controller('PropertyCtrl', ['$scope', '$location', 'PropertyService', function($scope, $location, PropertyService) {
-        console.log("In PropertyCtrl");
+    .controller('BeerCtrl', ['$scope', '$location', 'BeerService', function($scope, $location, BeerService) {
+        console.log("In BeerCtrl");
         hideOrShowBackBtn();
 
-        // Update the currently-in-use property when we load this one
+        // Update the currently-in-use beer when we load this one
         var re = /[0-9]+$/;
         var id = $location.url().match(re);
-        $scope.selectProperty( PropertyService.getPropertyByID(id) );
+        $scope.selectBeer( BeerService.getBeerByID(id) );
     }])
-
-    .controller('AnalysisCtrl', function($scope) {
-        console.log("In AnalysisCtrl");
-        hideOrShowBackBtn();
-    })
-
-    .controller('FinancingCtrl', function($scope) {
-        console.log("In FinancingCtrl");
-        hideOrShowBackBtn();
-    })
-
-    .controller('ProFormaCtrl', function($scope) {
-        console.log("In ProFormaCtrl");
-        hideOrShowBackBtn();
-
-        $scope.renderPDF = function() {
-            var doc = new jsPDF();
-
-            // We'll make our own renderer to skip this editor
-            var specialElementHandlers = {
-                '.button': function(element, renderer){
-                    return true;
-                }
-            };
-
-            // All units are in the set measurement for the document
-            // This can be changed to "pt" (points), "mm" (Default), "cm", "in"
-            doc.fromHTML(
-                document.getElementById('pro-forma')[0], // ID to turn into a PDF
-                15, // x coord
-                15, // y coord
-                {
-                    'width': 170,
-                    'elementHandlers': specialElementHandlers
-                }
-            );
-
-            doc.save('Pro Forma.pdf');
-        }
-    })
 
     .controller('PhotoCtrl', ['$scope', 'CameraFactory', function($scope, CameraFactory) {
         $scope.getPhoto = function() {
             CameraFactory.getPicture().then(function(imageURI) {
                 console.log(imageURI);
 
-                if( !Array.isArray($scope.property.images) ) $scope.property.images = [];
+                if( !Array.isArray($scope.beer.images) ) $scope.beer.images = [];
 
-                $scope.property.images.push(imageURI);
+                $scope.beer.images.push(imageURI);
 
             }, function(err) {
                 console.err(err);

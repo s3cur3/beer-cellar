@@ -32,69 +32,29 @@ angular.module('BeerCellarApp', ['ionic', 'BeerCellarApp.controllers', 'BeerCell
                 controller: 'AppCtrl'
             })
 
-            .state('app.criteria', {
-                url: "/criteria",
+            .state('app.beers', {
+                url: "/beers",
                 views: {
                     'menuContent': {
-                        templateUrl: "templates/criteria.html",
-                        controller: 'CriteriaCtrl'
+                        templateUrl: "templates/beers.html",
+                        controller: 'BeersCtrl'
                     }
                 }
             })
 
-            .state('app.properties', {
-                url: "/properties",
+            .state('app.beer', {
+                url: "/beers/:beerId",
                 views: {
                     'menuContent': {
-                        templateUrl: "templates/properties.html",
-                        controller: 'PropertiesCtrl'
-                    }
-                }
-            })
-
-            .state('app.property', {
-                url: "/properties/:propertyId",
-                views: {
-                    'menuContent': {
-                        templateUrl: "templates/property.html",
-                        controller: 'PropertyCtrl'
-                    }
-                }
-            })
-
-            .state('app.analysis', {
-                url: "/properties/:propertyId/analysis",
-                views: {
-                    'menuContent': {
-                        templateUrl: "templates/analysis.html",
-                        controller: 'AnalysisCtrl'
-                    }
-                }
-            })
-
-            .state('app.financing', {
-                url: "/properties/:propertyId/financing",
-                views: {
-                    'menuContent': {
-                        templateUrl: "templates/financing.html",
-                        controller: 'FinancingCtrl'
-                    }
-                }
-            })
-
-            .state('app.proForma', {
-                url: "/properties/:propertyId/pro-forma",
-                views: {
-                    'menuContent': {
-                        templateUrl: "templates/pro-forma.html",
-                        controller: 'ProFormaCtrl'
+                        templateUrl: "templates/beer.html",
+                        controller: 'BeerCtrl'
                     }
                 }
             })
 
         ;
         // if none of the above states are matched, use this as the fallback
-        $urlRouterProvider.otherwise('/app/properties');
+        $urlRouterProvider.otherwise('/app/beers');
     })
 
     .config(function($compileProvider){
@@ -166,7 +126,7 @@ angular.module('BeerCellarApp', ['ionic', 'BeerCellarApp.controllers', 'BeerCell
 ;
 
 
-angular.module('RealEstateFilters', [])
+angular.module('BeerCellarFilters', [])
     .filter('percent', function() {
         return function( input ) {
             var rounded = Math.round(input * 10000) / 100;
