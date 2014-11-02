@@ -3,19 +3,25 @@
         <!--The menu button-->
         <button menu-toggle="left" class="button button-icon icon ion-navicon menu-button"></button>
     </ion-nav-buttons>
-    <ion-nav-buttons side="right">
-        <a class="button button-clear button-positive" href="#/app/properties/{{beer.id}}/analysis">
-            Analyze
-        </a>
-    </ion-nav-buttons>
     <ion-content class="has-header">
-        <h1 class="content-pad">Property Info</h1>
+        <h1 class="content-pad">Beer Info</h1>
         <div class="list">
             <group label="Basic Info">
-                <text-field label="Name" ng-model="beer.name"></text-field>
                 <text-field label="Brewery" ng-model="beer.brewery"></text-field>
+                <text-field label="Name" ng-model="beer.name"></text-field>
                 <number-field label="Purchased Price" ng-model="beer.purchasePrice" prefix="$"></number-field>
-                <text-field label="Purchase Date" ng-model="beer.purchaseDate"></text-field>
+                <label class="item item-input item-select">
+                    <div class="input-label">Volume</div>
+                    <select ng-model="beer.volume">
+                        <option ng-repeat="v in volumes">
+                            {{v}}
+                        </option>
+                    </select>
+                </label>
+                <number-field label="Quantity" ng-model="beer.quantity"></number-field>
+                <month-field label="Purchase Date" ng-model="beer.purchaseDate"></month-field>
+                <month-field label="Drink After" ng-model="beer.drinkAfterDate"></month-field>
+                <month-field label="Drink Before" ng-model="beer.drinkBeforeDate"></month-field>
             </group>
 
             <div class="item spacer invisible">

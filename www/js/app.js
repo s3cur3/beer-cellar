@@ -89,6 +89,26 @@ angular.module('BeerCellarApp', ['ionic', 'BeerCellarApp.controllers', 'BeerCell
                 '</number-field>'
         };
     })
+    .directive('monthField', function($compile) {
+        return {
+            restrict: 'E', // must be an HTML element
+            replace: true,
+            scope: {
+                label: '@',
+                prefix: '@',
+                suffix: '@',
+                model: '=ngModel',
+                isEditable: '&'
+            },
+            template:
+                '<label class="item item-input">' +
+                    '<span class="input-label">' +
+                        '{{label}}' +
+                    '</span>' +
+                    '<input class="item-field" type="month" class="right" ng-model="model">' +
+                '</number-field>'
+        };
+    })
     .directive('textField', function() {
         return {
             restrict: 'E', // must be an HTML element

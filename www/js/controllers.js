@@ -33,6 +33,13 @@ angular.module('BeerCellarApp.controllers', [])
         $scope.BeerService = BeerService;
         $scope.beers = BeerService.allBeers();
         $scope.beer = $scope.beers[ BeerService.getLastActiveIndex() ];
+        $scope.volumes = [
+            "12 oz.",
+            "16 oz.",
+            "22 oz.",
+            "750 mL",
+            "40 oz."
+        ];
 
         $scope.selectBeer = function(prop, index) {
             $scope.beer = prop;

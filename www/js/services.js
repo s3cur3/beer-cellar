@@ -12,6 +12,8 @@ angular.module('BeerCellarApp.services', [])
 
                 images: [],
 
+                volume: volume.twentytwo,
+                quantity: 1,
                 purchasePrice: 0,
                 purchaseDate: 0,
                 drinkAfterDate: 0,
