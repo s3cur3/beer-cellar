@@ -26,10 +26,11 @@ angular.module('BeerCellarApp.services', [])
 
                 volume: "22 oz.",
                 quantity: 1,
+                style: "IPA",
                 purchasePrice: 10,
                 purchaseDate: _thisMonth(),
-                drinkAfterDate: _yearsInTheFuture(3),
-                drinkBeforeDate: _yearsInTheFuture(6)
+                drinkAfterYears: 3,
+                drinkBeforeYears: 6
             }
         };
 

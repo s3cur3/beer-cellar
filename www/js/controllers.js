@@ -30,6 +30,7 @@ angular.module('BeerCellarApp.controllers', [])
 
     .controller('AppCtrl', ['$scope', '$location', '$ionicModal', 'BeerService', 'CameraFactory', function( $scope, $location, $ionicModal, BeerService, CameraFactory ) {
         // Set up beer functionality
+        $scope.DateMath = DateMath;
         $scope.BeerService = BeerService;
         $scope.beers = BeerService.allBeers();
         $scope.beer = $scope.beers[ BeerService.getLastActiveIndex() ];
@@ -39,6 +40,21 @@ angular.module('BeerCellarApp.controllers', [])
             "22 oz.",
             "750 mL",
             "40 oz."
+        ];
+        $scope.styles = [
+            "IPA",
+            "Double IPA",
+            "Belgian IPA",
+            "Stout",
+            "Imperial Stout",
+            "Scotch Ale",
+            "Saison/Farmhouse Ale",
+            "Belgian Blonde Ale",
+            "Dubbel",
+            "Tripel",
+            "Quadruppel",
+            "Barleywine",
+            "Other"
         ];
 
         $scope.selectBeer = function(prop, index) {

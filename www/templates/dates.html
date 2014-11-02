@@ -1,0 +1,24 @@
+<ion-view title="Beers by Date">
+    <ion-nav-buttons side="left">
+        <button menu-toggle="left" class="button button-icon icon ion-navicon menu-button"></button>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+        <button class="button button-icon" ng-click="addBeer()">
+            <i class="icon ion-compose positive"></i><!-- ion-ios7-plus-empty? -->
+        </button>
+    </ion-nav-buttons>
+    <ion-content class="has-header">
+        <ion-list>
+            <group ng-repeat="chunk in beers | dates | chunks" label="chunk.quarter">
+                <ion-item ng-repeat="b in chunk.beers" href="#/app/beers/{{b.id}}">
+                    <p>{{b.brewery}}</p>
+                    <h2>{{b.name}}</h2>
+                    <div class="badge" ng-show="b.volume != ''">
+                        {{DateMath.addYears(b.purchaseDate, b.drinkAfterYears)}}
+                        <span class="badge badge-positive" ng-show="b.quantity > 1">{{b.quantity}}</span>
+                    </div>
+                </ion-item>
+            </group>
+        </ion-list>
+    </ion-content>
+</ion-view>

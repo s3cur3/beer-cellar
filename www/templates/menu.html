@@ -12,10 +12,15 @@
         </header>
         <ion-content class="has-header">
             <ion-list>
-                <ion-item nav-clear menu-close href="#/app/beers" class="item-icon-left">
-                    <i class="icon ion-ios7-home"></i>
-                    Beers
+                <ion-item nav-clear menu-close href="#/app/dates" class="item-icon-left">
+                    <i class="icon ion-ios7-calendar-outline"></i>
+                    Beers by Date
                 </ion-item>
+                <ion-item nav-clear menu-close href="#/app/styles" class="item-icon-left">
+                    <i class="icon fa fa-beer"></i>
+                    Beers by Style
+                </ion-item>
+
 
                 <!-- Most recent beer stuff (only shows if the user has ever looked at a beer) -->
                 <div class="item spacer" ng-show="beerService.getLastActiveIndex() != -1">

@@ -1,4 +1,4 @@
-<ion-view title="{{beer.basics.name}}">
+<ion-view title="{{beer.name}}">
     <ion-nav-buttons side="left">
         <!--The menu button-->
         <button menu-toggle="left" class="button button-icon icon ion-navicon menu-button"></button>
@@ -11,6 +11,14 @@
                 <text-field label="Name" ng-model="beer.name"></text-field>
                 <number-field label="Purchased Price" ng-model="beer.purchasePrice" prefix="$"></number-field>
                 <label class="item item-input item-select">
+                    <div class="input-label">Style</div>
+                    <select ng-model="beer.style">
+                        <option ng-repeat="s in styles">
+                            {{s}}
+                        </option>
+                    </select>
+                </label>
+                <label class="item item-input item-select">
                     <div class="input-label">Volume</div>
                     <select ng-model="beer.volume">
                         <option ng-repeat="v in volumes">
@@ -20,8 +28,8 @@
                 </label>
                 <number-field label="Quantity" ng-model="beer.quantity"></number-field>
                 <month-field label="Purchase Date" ng-model="beer.purchaseDate"></month-field>
-                <month-field label="Drink After" ng-model="beer.drinkAfterDate"></month-field>
-                <month-field label="Drink Before" ng-model="beer.drinkBeforeDate"></month-field>
+                <number-field label="Drink After" ng-model="beer.drinkAfterYears" suffix="years"></number-field>
+                <number-field label="Drink Before" ng-model="beer.drinkBeforeYears" suffix="years"></number-field>
             </group>
 
             <div class="item spacer invisible">
