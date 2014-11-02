@@ -1,4 +1,16 @@
 
+function _yearsInTheFuture(yearsFromNow) {
+    if(typeof yearsFromNow === "undefined")
+        yearsFromNow = 0;
+
+    var d = new Date();
+    return (d.getMonth() + 1) + "-" + (d.getYear() + parseInt(yearsFromNow));
+}
+
+function _thisMonth() {
+    return _yearsInTheFuture(0);
+}
+
 angular.module('BeerCellarApp.services', [])
 
     .service('BeerService', function() {
@@ -12,12 +24,12 @@ angular.module('BeerCellarApp.services', [])
 
                 images: [],
 
-                volume: volume.twentytwo,
+                volume: "22 oz.",
                 quantity: 1,
-                purchasePrice: 0,
-                purchaseDate: 0,
-                drinkAfterDate: 0,
-                drinkBeforeDate: 0
+                purchasePrice: 10,
+                purchaseDate: _thisMonth(),
+                drinkAfterDate: _yearsInTheFuture(3),
+                drinkBeforeDate: _yearsInTheFuture(6)
             }
         };
 
@@ -73,21 +85,22 @@ angular.module('BeerCellarApp.services', [])
                 if( !Array.isArray(beers) ) {
                     newBeers.push(_Beer(0));
                     return newBeers;
+                } else {
+                    // TODO: Remove this?
+                    // Nuke any beers without an id
+                    _.remove( beers, function(prop) {
+                        if( typeof prop == "object" && prop ) {
+                            return prop.id == null;
+                        }
+                        return true; // Not an object; what's it doing here??
+                    });
+
+                    return beers;
                 }
-
-                // TODO: Remove this?
-                // Nuke any beers without an id
-                _.remove( beers, function(prop) {
-                    if( typeof prop == "object" && prop ) {
-                        return prop.id == null;
-                    }
-                    return true; // Not an object; what's it doing here??
-                });
-
-                return beers;
+            } else {
+                newBeers.push(_Beer(0));
+                return newBeers;
             }
-            newBeers.push(_Beer(0));
-            return newBeers;
         };
 
         /**

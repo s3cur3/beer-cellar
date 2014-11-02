@@ -59,6 +59,10 @@ input[type=text].item-field {
     text-align: right;
     height: 1.5em;
 }
+.badge > .badge {
+    margin-top: 12px;
+    right: 0;
+}
 
 
 /** Lists **/
