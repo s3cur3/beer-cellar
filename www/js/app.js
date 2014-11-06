@@ -162,6 +162,8 @@ DateMath = {
      * @return {month: MM, year: YYYY}
      */
     getMonthAndYear: function(date) {
+        assert(typeof date === "string");
+
         var arrayVersion = date.split("-");
 
         var m = parseInt(arrayVersion[1]);
@@ -183,11 +185,16 @@ DateMath = {
         };
     },
 
+    /**
+     * @param beerObj {} A beer object from the BeerService
+     * @return string A date string formatted as: YYYY-MM
+     */
     getDrinkDate: function(beerObj) {
         return DateMath.addYears(beerObj.purchaseDate, beerObj.drinkAfterYears);
     },
 
     getQuarter: function(dateString) {
+        assert(typeof dateString === "string");
         return DateMath.getMonthAndYear(dateString).quarter;
     },
 
@@ -198,7 +205,6 @@ DateMath = {
      */
     addYears: function(date, years) {
         var monthAndYears = DateMath.getMonthAndYear(date);
-        console.log("Adding " + years + " years to date " + date + ":", (monthAndYears.year + parseInt(years)) + "-" + monthAndYears.month);
         return (monthAndYears.year + parseInt(years)) + "-" + monthAndYears.month;
     },
 
@@ -249,10 +255,10 @@ DateMath = {
      * @return number Negative if date1's calendar quarter comes before date2's calendar quarter; positive if date2's calendar quarter comes before date1's calendar quarter; zero if they are in the same calendar quarter.
      */
     compareQuarter: function(date1, date2) {
-        var monthAndYears1 = DateMath.getMonthAndYear(date1);
-        var monthAndYears2 = DateMath.getMonthAndYear(date2);
+        if(DateMath.compareYear(date1, date2) === 0) { // same year
+            var monthAndYears1 = DateMath.getMonthAndYear(date1);
+            var monthAndYears2 = DateMath.getMonthAndYear(date2);
 
-        if(DateMath.compareYear(date1, date2) == 0) { // same year
             if(monthAndYears1.quarter < monthAndYears2.quarter) {
                 return -1;
             } else if(monthAndYears1.quarter > monthAndYears2.quarter) {
@@ -263,6 +269,63 @@ DateMath = {
         } else {
             return DateMath.compareYear(date1, date2);
         }
+    },
+
+    yearsInTheFuture: function(yearsFromNow) {
+        if(typeof yearsFromNow === "undefined")
+            yearsFromNow = 0;
+
+        var d = new Date();
+        return (d.getFullYear() + parseInt(yearsFromNow)) + "-" + (d.getMonth() + 1);
+    },
+
+    thisMonth: function() {
+        return DateMath.yearsInTheFuture(0);
+    },
+
+    monthNumberToString: function(monthNumberOneToTwelve) {
+        var monthString = "";
+        switch(monthNumberOneToTwelve) {
+            case 1:
+                monthString = "January";
+                break;
+            case 2:
+                monthString = "February";
+                break;
+            case 3:
+                monthString = "March";
+                break;
+            case 4:
+                monthString = "April";
+                break;
+            case 5:
+                monthString = "May";
+                break;
+            case 6:
+                monthString = "June";
+                break;
+            case 7:
+                monthString = "July";
+                break;
+            case 8:
+                monthString = "August";
+                break;
+            case 9:
+                monthString = "September";
+                break;
+            case 10:
+                monthString = "October";
+                break;
+            case 11:
+                monthString = "November";
+                break;
+            case 12:
+                monthString = "December";
+                break;
+            default:
+                console.error("Unknown month number:", monthAndYear.month);
+        }
+        return monthString;
     }
 };
 
@@ -276,7 +339,7 @@ angular.module('BeerCellarFilters', [])
             return '' + rounded + '%';
         };
     })
-    .filter('dates', function() {
+    .filter('sortDates', function() {
         /**
          * @param beerList An array of BeerService _Beer objects
          */
@@ -289,31 +352,14 @@ angular.module('BeerCellarFilters', [])
             return beerList;
         };
     })
-    .filter('chunks', function() {
+    .filter('dateString', function() {
         /**
-         * @param beerList array An ordered array of BeerService _Beer objects (likely ordered because you passed it through the date filter!)
+         * @param date string A date string formatted as: YYYY-MM
          */
-        return function(beerList) {
-            var chunks = [];
-            for(var i = 0; i < beerList.length; i++) {
-                var isNewQuarter = false;
-                if(i - 1 >= 0) {
-                    var crntDrinkDate = DateMath.getDrinkDate(beerList[i]);
-                    var prevDrinkDate = DateMath.getDrinkDate(beerList[i]);
-                    isNewQuarter = DateMath.compareQuarter(crntDrinkDate, prevDrinkDate) !== 0;
-                } else {
-                    // We're looking at the first beer in the list
-                    isNewQuarter = true;
-                }
-
-                if(isNewQuarter) {
-                    chunks.push({
-                        quarter: "Q" + DateMath.getQuarter(crntDrinkDate) + " " + DateMath.getMonthAndYear(crntDrinkDate).year,
-                        beers: [beerList[i]]
-                    });
-                }
-            }
-            return chunks;
+        return function(date) {
+            var monthAndYear = DateMath.getMonthAndYear(date);
+            var monthString = DateMath.monthNumberToString(monthAndYear.month);
+            return monthString + " " + monthAndYear.year;
         };
     })
     .filter('style', function() {

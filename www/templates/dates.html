@@ -9,12 +9,12 @@
     </ion-nav-buttons>
     <ion-content class="has-header">
         <ion-list>
-            <group ng-repeat="chunk in beers | dates | chunks" label="chunk.quarter">
+            <group ng-repeat="chunk in beersChunkedByDate" label="{{chunk.quarter}}">
                 <ion-item ng-repeat="b in chunk.beers" href="#/app/beers/{{b.id}}">
                     <p>{{b.brewery}}</p>
                     <h2>{{b.name}}</h2>
                     <div class="badge" ng-show="b.volume != ''">
-                        {{DateMath.addYears(b.purchaseDate, b.drinkAfterYears)}}
+                        {{DateMath.addYears(b.purchaseDate, b.drinkAfterYears) | dateString}}
                         <span class="badge badge-positive" ng-show="b.quantity > 1">{{b.quantity}}</span>
                     </div>
                 </ion-item>

@@ -17,7 +17,7 @@
                     Beers by Date
                 </ion-item>
                 <ion-item nav-clear menu-close href="#/app/styles" class="item-icon-left">
-                    <i class="icon fa fa-beer"></i>
+                    <i class="icon ion-beer"></i>
                     Beers by Style
                 </ion-item>
 
@@ -25,14 +25,18 @@
                 <!-- Most recent beer stuff (only shows if the user has ever looked at a beer) -->
                 <div class="item spacer" ng-show="beerService.getLastActiveIndex() != -1">
                 </div>
-                <group label="Most Recent Beer" id="menu-most-recent-beer" ng-show="beerService.getLastActiveIndex() != -1">
-                    <ion-item nav-clear menu-close href="#/app/properties/{{beerService.getLastActiveIndex() + 1}}" class="item-icon-left">
+                <group label="Most Recent Beer" id="menu-most-recent-beer" ng-show="BeerService.getLastActiveIndex() != -1">
+                    <ion-item nav-clear menu-close href="#/app/beers/{{BeerService.getLastActiveIndex() + 1}}" class="item-icon-left">
                         <i class="icon ion-edit"></i>
                         {{beer.name}}
                     </ion-item>
-                    <ion-item nav-clear menu-close href="#/app/properties/{{beerService.getLastActiveIndex() + 1}}/analysis" class="item-icon-left">
-                        <i class="icon" ng-class="{'ion-thumbsdown': !greenLight(), 'ion-thumbsup': greenLight()}"></i>
-                        Analysis
+                    <ion-item nav-clear menu-close class="item-icon-left" ng-show="greenLight()">
+                        <i class="icon ion-thumbsup"></i>
+                        Ready to drink!
+                    </ion-item>
+                    <ion-item nav-clear menu-close class="item-icon-left" ng-show="!greenLight()">
+                        <i class="icon ion-ios7-timer-outline"></i>
+                        Not ready to drink
                     </ion-item>
                 </group>
             </ion-list>

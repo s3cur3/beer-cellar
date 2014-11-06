@@ -1,16 +1,4 @@
 
-function _yearsInTheFuture(yearsFromNow) {
-    if(typeof yearsFromNow === "undefined")
-        yearsFromNow = 0;
-
-    var d = new Date();
-    return (d.getMonth() + 1) + "-" + (d.getYear() + parseInt(yearsFromNow));
-}
-
-function _thisMonth() {
-    return _yearsInTheFuture(0);
-}
-
 angular.module('BeerCellarApp.services', [])
 
     .service('BeerService', function() {
@@ -28,7 +16,7 @@ angular.module('BeerCellarApp.services', [])
                 quantity: 1,
                 style: "IPA",
                 purchasePrice: 10,
-                purchaseDate: _thisMonth(),
+                purchaseDate: DateMath.thisMonth(),
                 drinkAfterYears: 3,
                 drinkBeforeYears: 6
             }
@@ -70,7 +58,7 @@ angular.module('BeerCellarApp.services', [])
                     }
                 }
 
-                console.error("ERROR: Couldn't find beer " + id);
+                console.error("Couldn't find beer with ID " + id);
                 return beers[0];
             }
             return _this.newBeer();
@@ -80,10 +68,11 @@ angular.module('BeerCellarApp.services', [])
             // TODO: This is RIDICULOUSLY inefficient --- it's called all the damn time!
             var beersString = window.localStorage['beers'];
             var newBeers = [];
-            if( beersString ) {
+            if(beersString) {
                 var beers = angular.fromJson(beersString);
 
                 if( !Array.isArray(beers) ) {
+                    console.error("Stored beers list was not an array! Creating a new beers list...");
                     newBeers.push(_Beer(0));
                     return newBeers;
                 } else {
@@ -91,14 +80,18 @@ angular.module('BeerCellarApp.services', [])
                     // Nuke any beers without an id
                     _.remove( beers, function(prop) {
                         if( typeof prop == "object" && prop ) {
+                            if(prop.id == null) console.error("Found a beer without an ID set. Removing it...");
                             return prop.id == null;
                         }
+
+                        console.error("Found a beer that wasn't an object. Removing it...");
                         return true; // Not an object; what's it doing here??
                     });
 
                     return beers;
                 }
             } else {
+                console.log("No beer list stored. Creating a new one...");
                 newBeers.push(_Beer(0));
                 return newBeers;
             }
@@ -138,9 +131,9 @@ angular.module('BeerCellarApp.services', [])
             return beers;
         };
 
-        this.save = function( beerOrBeers ) {
+        this.save = function(beerOrBeers) {
             var beers = [];
-            if( !Array.isArray(beerOrBeers) ) {
+            if(!Array.isArray(beerOrBeers)) {
                 beers = _this.allBeers();
 
                 var b = beerOrBeers;
@@ -157,8 +150,9 @@ angular.module('BeerCellarApp.services', [])
         };
 
         this.delete = function( beer ) {
+            console.log("Deleting beer", beer);
             var beers = _this.allBeers();
-            _.remove( beers, function(prop) {
+            _.remove(beers, function(prop) {
                 return prop.id == beer.id;
             });
             _this.save(beers);

@@ -28,12 +28,52 @@ function hideOrShowBackBtn() {
 
 angular.module('BeerCellarApp.controllers', [])
 
-    .controller('AppCtrl', ['$scope', '$location', '$ionicModal', 'BeerService', 'CameraFactory', function( $scope, $location, $ionicModal, BeerService, CameraFactory ) {
+    .controller('AppCtrl', ['$scope', '$location', '$ionicModal', '$filter', 'BeerService', 'CameraFactory', function( $scope, $location, $ionicModal, $filter, BeerService, CameraFactory ) {
+        $scope.getDatesChunked = function() {
+            var chunks = [];
+
+            var sizeBefore = $scope.beers.length;
+            $scope.beers = $filter('sortDates')($scope.beers);
+            assert(sizeBefore === $scope.beers.length);
+
+            for(var i = 0; i < $scope.beers.length; i++) {
+                var isNewQuarter = false;
+                var crntDrinkDate = DateMath.getDrinkDate($scope.beers[i]);
+
+                if(i - 1 >= 0) {
+                    var prevDrinkDate = DateMath.getDrinkDate($scope.beers[i - 1]);
+                    isNewQuarter = DateMath.compareQuarter(crntDrinkDate, prevDrinkDate) !== 0;
+                } else {
+                    // We're looking at the first beer in the list
+                    isNewQuarter = true;
+                }
+
+                if(isNewQuarter) {
+                    chunks.push({
+                        quarter: "Q" + DateMath.getQuarter(crntDrinkDate) + " " + DateMath.getMonthAndYear(crntDrinkDate).year,
+                        beers: [$scope.beers[i]]
+                    });
+                } else {
+                    chunks[chunks.length -1].beers.push($scope.beers[i]);
+                }
+            }
+
+            var count = 0;
+            for(i = 0; i < chunks.length; i++) {
+                count += chunks[i].beers.length;
+            }
+            assert($scope.beers.length == count);
+
+            return chunks;
+        };
+
+
         // Set up beer functionality
         $scope.DateMath = DateMath;
         $scope.BeerService = BeerService;
         $scope.beers = BeerService.allBeers();
         $scope.beer = $scope.beers[ BeerService.getLastActiveIndex() ];
+        $scope.beersChunkedByDate = $scope.getDatesChunked();
         $scope.volumes = [
             "12 oz.",
             "16 oz.",
@@ -57,21 +97,19 @@ angular.module('BeerCellarApp.controllers', [])
             "Other"
         ];
 
+
         $scope.selectBeer = function(prop, index) {
             $scope.beer = prop;
             BeerService.setLastActiveIndex(index || prop);
         };
 
-        $scope.greenLight = function(p) {
-            if(!p) p = $scope.beer;
+        $scope.greenLight = function(b) {
+            if (!b) b = $scope.beer;
 
-            var giveGreenLight = true;
-            for( var fn in $scope.analysis ) {
-                if( $scope.analysis.hasOwnBeer(fn) ) {
-                    giveGreenLight &= $scope.analysis[fn](p);
-                }
-            }
-            return giveGreenLight;
+            var drinkDateStr = DateMath.getDrinkDate(b);
+            var thisMonth = DateMath.thisMonth();
+
+            return DateMath.compare(thisMonth, drinkDateStr) >= 0;
         };
 
 
@@ -91,6 +129,7 @@ angular.module('BeerCellarApp.controllers', [])
         $scope._delete = function() {
             $scope.deleteModal.hide();
             BeerService.delete($scope.beerToDelete);
+            $scope.beers = BeerService.allBeers();
             $location.path('/beers');
         };
         $scope.closeDelete = function() {
@@ -114,6 +153,7 @@ angular.module('BeerCellarApp.controllers', [])
             if( typeof updatedBeer == "object" && updatedBeer ) {
                 BeerService.save(updatedBeer);
                 $scope.beers = BeerService.allBeers();
+                $scope.beersChunkedByDate = $scope.getDatesChunked();
             } else {
                 console.log("Got empty beer in an update...?");
             }
