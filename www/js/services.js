@@ -1,6 +1,166 @@
 
 angular.module('BeerCellarApp.services', [])
 
+    .factory('User', function() {
+
+        /**
+         * Constructor, with class name
+         */
+        function User(_data) {
+            if(typeof _data === "undefined" || !_data)
+                return null;
+
+            // Public properties, assigned to the instance ('this')
+            this.firstName = _data.firstName || 'Unknown';
+            this.lastName = _data.lastName || 'Unknown';
+            this.username = _data.username || 'Unknown';
+            this.id = _data._id || 'Unknown';
+        }
+
+        /**
+         * Public method, assigned to prototype
+         */
+        User.prototype.getFullName = function () {
+            return this.firstName + ' ' + this.lastName;
+        };
+
+        /**
+         * Static method, assigned to class
+         * Instance ('this') is not available in static context
+         */
+        User.build = function (data) {
+            if(data && typeof data != "undefined")
+                return new User(data);
+            else
+                return null;
+        };
+
+        /**
+         * Return the constructor function
+         */
+        return User;
+    })
+
+    .factory('UserService', function($kinvey, User) {
+        var currentUser = null;
+
+        return {
+            /**
+             *
+             * @returns {*}
+             */
+            activeUser: function () {
+                if (currentUser === null) {
+                    currentUser = User.build($kinvey.getActiveUser());
+                }
+                return currentUser;
+            },
+            /**
+             *
+             * @param {String} _username
+             * @param {String} _password
+             * @returns {*}
+             */
+            login: function (_username, _password) {
+                //Kinvey login starts
+                var promise = $kinvey.User.login({
+                    username: _username,
+                    password: _password
+                });
+
+                promise.then(function (response) {
+                    return User.build(response);
+                }, function (error) {
+                    //Kinvey login finished with error
+                    console.log("Error logging in: " + error.description);
+                });
+
+                return promise;
+            },
+
+            createUser: function(_username, _password) {
+                var promise = $kinvey.User.signup({
+                    username : _username,
+                    password : _password
+                });
+
+                promise.then(function (response) {
+                    return User.build(response);
+                }, function (error) {
+                    console.log("Error creating account: " + error.description);
+                });
+
+                return promise;
+            }
+        };
+    })
+
+    .factory('AvatarService', function ($kinvey, Avatar) {
+        return {
+            /**
+             *
+             * @returns {*}
+             */
+            find: function() {
+                var query = new $kinvey.Query();
+                var promise = $kinvey.File.find(query).then(function(_data) {
+                    console.log("find: " + JSON.stringify(_data));
+                    return _data
+                        .map(Avatar.build)
+                        .filter(Boolean);
+                }, function error(err) {
+                    console.log('[find] received error: ' + JSON.stringify(err));
+                });
+
+                return promise;
+            },
+            /**
+             *
+             * @param {String} _id
+             * @returns {*}
+             */
+            remove: function(_id) {
+                return $kinvey.File.destroy(_id);
+            },
+            /**
+             *
+             * @param {String} _id
+             * @returns {*}
+             */
+            get: function(_id) {
+                // create the kinvey file object
+                var promise = $kinvey.File.download(_id).then(function(_data) {
+                    console.log("download: " + JSON.stringify(_data));
+                    return Avatar.build(_data);
+                }, function error(err) {
+                    console.log('[download] received error: ' + JSON.stringify(err));
+                });
+
+                return promise;
+            },
+            /**
+             *
+             * @param {File} _file
+             * @returns {*}
+             */
+            upload: function(_file) {
+                var promise = $kinvey.File.upload(_file.file, {
+                    _filename: _file.file.name,
+                    public: true,
+                    size: _file.file.size,
+                    mimeType: _file.file.type
+                }).then(function(_data) {
+                    console.log("$upload: " + JSON.stringify(_data));
+                    return Avatar.build(_data);
+                }, function error(err) {
+                    console.log('[$upload] received error: ' + JSON.stringify(err));
+                });
+
+                return promise;
+            }
+        };
+    })
+
     .service('BeerService', function() {
         var _Beer = function(newID) {
             if( typeof newID === "undefined" ) newID = _this._getNextID();

@@ -9,17 +9,52 @@ function assert( testResult, optionalErrorMsg ) {
     }
 }
 
+//function selects the desired behavior depending on whether the user is logged or not
+function determineKinveyBehavior($kinvey, $state, $rootScope, UserService) {
+    var activeUser = UserService.activeUser();
+    console.log("$state: ", $state);
+    console.log("activeUser: " + JSON.stringify(activeUser,null,2));
+    if ((activeUser === null)) {
+        $state.go('signin');
+    } else if (($state.current.name === 'sign-in') && (activeUser !== null)) {
+        $state.go('app.dates');
+    }
+}
 
-angular.module('BeerCellarApp', ['ionic', 'BeerCellarApp.controllers', 'BeerCellarFilters', 'BeerCellarApp.services'])
 
-    .run(function( $ionicPlatform ) {
+angular.module('BeerCellarApp', ['ionic', 'kinvey', 'BeerCellarApp.controllers', 'BeerCellarFilters', 'BeerCellarApp.services'])
+
+    .run(['$ionicPlatform', '$kinvey', '$rootScope', '$state','UserService', function ($ionicPlatform, $kinvey, $rootScope, $state, UserService) {
         $ionicPlatform.ready(function() {
             if( window.StatusBar ) {
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
             }
+
+            // Initialize Kinvey MBaaS
+            var promise = $kinvey.init({
+                appKey: 'kid_b1l19t0ZU',
+                appSecret: '173b833d9a1e4577a935cb7847767044'
+            });
+            promise.then(function () {
+                // Kinvey initialization finished with success
+                console.log("Kinvey init with success");
+                determineKinveyBehavior($kinvey, $state, $rootScope, UserService);
+
+                // setup the stateChange listener
+                $rootScope.$on("$stateChangeStart", function (event, toState /*, toParams, fromState, fromParams*/) {
+                    if (toState.name !== 'signin') {
+                        determineKinveyBehavior($kinvey, $state, $rootScope,UserService);
+                    }
+                });
+
+            }, function (errorCallback) {
+                // Kinvey initialization finished with error
+                console.log("Kinvey init with error: " + JSON.stringify(errorCallback));
+                determineKinveyBehavior($kinvey, $state, $rootScope,UserService);
+            });
         });
-    })
+    }])
 
     // Define our routes
     .config(function( $stateProvider, $urlRouterProvider ) {
@@ -30,6 +65,18 @@ angular.module('BeerCellarApp', ['ionic', 'BeerCellarApp.controllers', 'BeerCell
                 abstract: true,
                 templateUrl: "templates/menu.html",
                 controller: 'AppCtrl'
+            })
+
+            .state('signin', {
+                url: "/sign-in",
+                templateUrl: "templates/sign-in.html",
+                controller: 'SignInCtrl'
+            })
+
+            .state('signup', {
+                url: "/sign-up",
+                templateUrl: "templates/sign-up.html",
+                controller: 'SignUpCtrl'
             })
 
             .state('app.styles', {
@@ -64,7 +111,7 @@ angular.module('BeerCellarApp', ['ionic', 'BeerCellarApp.controllers', 'BeerCell
 
         ;
         // if none of the above states are matched, use this as the fallback
-        $urlRouterProvider.otherwise('/app/dates');
+        $urlRouterProvider.otherwise('/sign-in');
     })
 
     .config(function($compileProvider){

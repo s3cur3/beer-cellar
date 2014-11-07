@@ -28,7 +28,7 @@ function hideOrShowBackBtn() {
 
 angular.module('BeerCellarApp.controllers', [])
 
-    .controller('AppCtrl', ['$scope', '$location', '$ionicModal', '$filter', 'BeerService', 'CameraFactory', function( $scope, $location, $ionicModal, $filter, BeerService, CameraFactory ) {
+    .controller('AppCtrl', ['$scope', '$kinvey', '$state', '$location', '$ionicModal', '$filter', 'BeerService', 'CameraFactory', function($scope, $kinvey, $state, $location, $ionicModal, $filter, BeerService, CameraFactory) {
         $scope.getDatesChunked = function() {
             var chunks = [];
 
@@ -158,6 +158,63 @@ angular.module('BeerCellarApp.controllers', [])
                 console.log("Got empty beer in an update...?");
             }
         }, true);
+
+        $scope.logout = function () {
+            console.log("logout");
+
+            //Kinvey logout starts
+            var promise = $kinvey.User.logout();
+            promise.then(
+                function () {
+                    //Kinvey logout finished with success
+                    console.log("user logout");
+                    $kinvey.setActiveUser(null);
+                    $state.go('signin');
+                },
+                function (error) {
+                    //Kinvey logout finished with error
+                    alert("Error logout: " + JSON.stringify(error));
+                });
+        }
+    }])
+
+    .controller('SignInCtrl', ['$scope', '$kinvey', '$state', 'UserService', function ($scope, $kinvey, $state, UserService) {
+        console.log('Sign In Ctrl');
+        $scope.signIn = function (user) {
+            console.log('Sign In', user);
+
+            UserService.login(user.username, user.password).then(function(response) {
+                    //Kinvey login finished with success
+                    $scope.submittedError = false;
+                    $state.go('app.dates');
+                },
+                function (error) {
+                    //Kinvey login finished with error
+                    $scope.submittedError = true;
+                    $scope.errorDescription = error.description;
+                    console.log("Error login " + error.description);//
+                }
+            );
+        };
+    }])
+
+    .controller('SignUpCtrl', ['$scope', '$kinvey', '$state', 'UserService', function ($scope, $kinvey, $state, UserService) {
+        $scope.createUser = function(user) {
+            console.log('Sign Up', user);
+
+            UserService.createUser(user.username, user.password).then(function(response) {
+                    // Kinvey login finished with success
+                    $scope.submittedError = false;
+                    $state.go('app.dates');
+                },
+                function (error) {
+                    //Kinvey login finished with error
+                    $scope.submittedError = true;
+                    $scope.errorDescription = error.description;
+                    console.log("Error login " + error.description);//
+                }
+            );
+        };
     }])
 
     .controller('BeersCtrl', ['$scope', '$location', 'BeerService', function($scope, $location, BeerService) {

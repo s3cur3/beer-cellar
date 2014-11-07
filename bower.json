@@ -2,7 +2,8 @@
   "name": "ionic-project",
   "version": "0.0.0",
   "dependencies": {
-    "lodash": "2.4.1"
+    "lodash": "2.4.1",
+    "angular-data": "~1.2.1"
   },
   "devDependencies": {
     "angular": "1.2.12",
