@@ -222,6 +222,17 @@ angular.module('BeerCellarApp.services', [])
                 return $kinvey.DataStore.find('beers');
             },
 
+            clean: function() {
+                var query = new $kinvey.Query();
+                query.equalTo('name', undefined).equalTo('brewery', undefined);
+
+                var secondQuery = new $kinvey.Query();
+                secondQuery.equalTo('name', 'New beer').equalTo('brewery', 'Unknown');
+                query.or(secondQuery);
+
+                return $kinvey.DataStore.clean('beers', query);
+            },
+
             /**
              * @return {Beer} A new beer object
              */

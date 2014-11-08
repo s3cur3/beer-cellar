@@ -6,13 +6,15 @@ function backBtnIsVisible() {
 
 var hideShowTimeouts = [];
 function hideOrShowBackBtn() {
+    var DEBUG_BACK_BTN = false;
+
     function hideOrShowBackBtnNonRecursive() {
         var menuBtn = $('.buttons.left-buttons');
         if( backBtnIsVisible() ) {
-            console.log("back btn found");
+            if(DEBUG_BACK_BTN) console.log("back btn found");
             menuBtn.hide();
         } else {
-            console.log("no back btn found");
+            if(DEBUG_BACK_BTN) console.log("no back btn found");
             menuBtn.show();
         }
     }
@@ -38,10 +40,23 @@ angular.module('BeerCellarApp.controllers', [])
 
             for(var i = 0; i < $scope.beers.length; i++) {
                 var isNewQuarter = false;
-                var crntDrinkDate = DateMath.getDrinkDate($scope.beers[i]);
+                var thisBeer = $scope.beers[i];
+                var prevBeer = $scope.beers[i - 1];
+
+                var crntDrinkDate;
+                if(thisBeer.purchaseDate && thisBeer.drinkAfterYears) {
+                    crntDrinkDate = DateMath.getDrinkDate($scope.beers[i]);
+                } else {
+                    crntDrinkDate = DateMath.thisMonth();
+                }
 
                 if(i - 1 >= 0) {
-                    var prevDrinkDate = DateMath.getDrinkDate($scope.beers[i - 1]);
+                    var prevDrinkDate;
+                    if(prevBeer.purchaseDate && prevBeer.drinkAfterYears) {
+                        prevDrinkDate = DateMath.getDrinkDate($scope.beers[i - 1]);
+                    } else {
+                        prevDrinkDate = DateMath.thisMonth();
+                    }
                     isNewQuarter = DateMath.compareQuarter(crntDrinkDate, prevDrinkDate) !== 0;
                 } else {
                     // We're looking at the first beer in the list
@@ -80,20 +95,22 @@ angular.module('BeerCellarApp.controllers', [])
                 $scope.beers = allBeers;
                 $scope.beersChunkedByDate = $scope.getDatesChunked();
             });
-        };
 
-        $scope.updateBeer = function() {
             BeerService.lastActive().then(function(beer) {
                 $scope.beer = beer;
             });
         };
 
-
         // Set up beer functionality
+        $scope.beers = [];
+        $scope.beer =  {};
+        $scope.updateBeers();
+
+        // Clean up Kinvey data
+        BeerService.clean();
+
         $scope.DateMath = DateMath;
         $scope.BeerService = BeerService;
-        $scope.updateBeers();
-        $scope.updateBeer();
         $scope.volumes = [
             "12 oz.",
             "16 oz.",
@@ -125,7 +142,7 @@ angular.module('BeerCellarApp.controllers', [])
         $scope.greenLight = function(b) {
             if(!b) b = $scope.beer;
 
-            if(b && b.purchaseDate) {
+            if(b && b.purchaseDate && typeof b.drinkAfterYears === "number") {
                 var drinkDateStr = DateMath.getDrinkDate(b);
                 var thisMonth = DateMath.thisMonth();
 
@@ -173,6 +190,7 @@ angular.module('BeerCellarApp.controllers', [])
 
         // Update the master beer list whenever we modify this beer
         $scope.$watch('beer', function(updatedBeer, oldBeer) {
+            console.log("Beer was updated!");
             if( typeof updatedBeer == "object" && updatedBeer ) {
                 BeerService.save(updatedBeer);
                 $scope.updateBeers();
@@ -241,8 +259,6 @@ angular.module('BeerCellarApp.controllers', [])
     .controller('BeersCtrl', ['$scope', '$location', 'BeerService', function($scope, $location, BeerService) {
         console.log("In BeersCtrl");
         hideOrShowBackBtn();
-
-        $scope.updateBeers();
 
         $scope.addBeer = function() {
             console.log("Adding beer");

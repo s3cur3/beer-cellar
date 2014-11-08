@@ -1,56 +1,63 @@
 
 // selects the desired state chnage behavior depending on whether the user is logged or not
-function determineKinveyBehavior($state, activeUser) {
+function determineKinveyBehavior($window, activeUser) {
     if(activeUser === null) {
         console.log("Redirecting to signin");
-        $state.go('signin');
-    } else if($state.current.name === 'sign-in') {
-        $state.go('app.dates');
+        $window.location = '#/app/signin';
+    } else if($window.location.toString().indexOf('sign-in') !== -1) {
+        $window.location = '#/app/dates';
     }
 }
+var beerCellarApp = angular.module('BeerCellarApp', ['ionic', 'kinvey', 'BeerCellarApp.controllers', 'BeerCellarFilters', 'BeerCellarApp.services']);
 
+// Inject Kinvey MBaaS *before* the rest of the app is allowed to init
+// (saves us from alllll sorts of race conditions in the controllers!)
+var $injector = angular.injector(['ng', 'kinvey']);
+$injector.invoke(["$kinvey", "$window", "$rootScope", function($kinvey, $window, $rootScope) {
 
-angular.module('BeerCellarApp', ['ionic', 'kinvey', 'BeerCellarApp.controllers', 'BeerCellarFilters', 'BeerCellarApp.services'])
+    $kinvey.init({
+        appKey: 'kid_b1l19t0ZU',
+        appSecret: '173b833d9a1e4577a935cb7847767044',
+        refresh: true,
+        sync: {
+            enable: true,
+            online : $window.navigator.onLine // set initial state
+        }
+    }).then(function(activeUser) {
+        // Kinvey initialization finished with success
+        console.log("Kinvey init with success. Active user is:", activeUser);
 
-    .run(['$ionicPlatform', '$kinvey', '$rootScope', '$state', "$window", 'UserService', function ($ionicPlatform, $kinvey, $rootScope, $state, $window, UserService) {
+        angular.bootstrap(document, ['BeerCellarApp']);
+
+        determineKinveyBehavior($window, activeUser);
+
+        // Inform Kinvey when we go offline (so it can cache things locally)
+        $(window).on({
+            offline : $kinvey.Sync.offline,
+            online  : $kinvey.Sync.online
+        });
+
+        // setup the stateChange listener
+        $rootScope.$on("$stateChangeStart", function (event, toState) {
+            if(toState.name !== 'signin') {
+                console.log("Tried to change to non-signin state");
+                determineKinveyBehavior($state, activeUser);
+            }
+        });
+    }, function(errorCallback) {
+        // Kinvey initialization finished with error
+        console.log("Kinvey init with error: " + JSON.stringify(errorCallback));
+        determineKinveyBehavior($window, activeUser);
+    });
+}]);
+
+beerCellarApp
+    .run(['$ionicPlatform', function ($ionicPlatform) {
         $ionicPlatform.ready(function() {
             if(window.StatusBar) {
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
             }
-
-            // Initialize Kinvey MBaaS
-            $kinvey.init({
-                appKey: 'kid_b1l19t0ZU',
-                appSecret: '173b833d9a1e4577a935cb7847767044',
-                refresh: true,
-                sync: {
-                    enable: true,
-                    online : $window.navigator.onLine // set initial state
-                }
-            }).then(function(activeUser) {
-                // Kinvey initialization finished with success
-                console.log("Kinvey init with success. Active user is:", activeUser);
-                determineKinveyBehavior($state, activeUser);
-
-                // setup the stateChange listener
-                $rootScope.$on("$stateChangeStart", function (event, toState /*, toParams, fromState, fromParams*/) {
-                    if(toState.name !== 'signin') {
-                        console.log("Tried to change to non-signin state");
-                        determineKinveyBehavior($state, activeUser);
-                    }
-                });
-
-                // Inform Kinvey when we go offline (so it can cache things locally)
-                $(window).on({
-                    offline : $kinvey.Sync.offline,
-                    online  : $kinvey.Sync.online
-                });
-            }, function(errorCallback) {
-                // Kinvey initialization finished with error
-                console.log("Kinvey init with error: " + JSON.stringify(errorCallback));
-                determineKinveyBehavior($state, activeUser);
-            });
         });
     }])
 
@@ -217,9 +224,14 @@ angular.module('BeerCellarFilters', [])
          */
         return function(beerList) {
             beerList.sort(function(beer1, beer2) {
-                var date1 = DateMath.getDrinkDate(beer1);
-                var date2 = DateMath.getDrinkDate(beer2);
-                return DateMath.compare(date1, date2);
+                if(beer1.purchaseDate && beer2.purchaseDate && beer1.drinkAfterYears && beer2.drinkAfterYears) {
+                    var date1 = DateMath.getDrinkDate(beer1);
+                    var date2 = DateMath.getDrinkDate(beer2);
+                    return DateMath.compare(date1, date2);
+                } else {
+                    return 0; // can't say anything about these two...
+                }
+
             });
             return beerList;
         };
@@ -229,6 +241,8 @@ angular.module('BeerCellarFilters', [])
          * @param date string A date string formatted as: YYYY-MM
          */
         return function(date) {
+            assert(typeof date === "string", "Object " + date.toString() + "was not a date string.");
+
             var monthAndYear = DateMath.getMonthAndYear(date);
             var monthString = DateMath.monthNumberToString(monthAndYear.month);
             return monthString + " " + monthAndYear.year;

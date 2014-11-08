@@ -44,7 +44,7 @@ DateMath = {
      * @return {{year: Number, month: Number, quarter: number}}
      */
     getQuarter: function(dateString) {
-        assert(typeof dateString === "string");
+        assert(typeof dateString === "string", "Object " + dateString + " was not a date string.");
         return DateMath.getMonthAndYear(dateString).quarter;
     },
 
@@ -54,6 +54,8 @@ DateMath = {
      * @return {string} A date string formatted as: YYYY-MM
      */
     addYears: function(date, years) {
+        assert(typeof date === "string", "Object " + date + " was not a date string.");
+        assert(typeof years === "number", "Years value " + years + " was not a number.");
         var monthAndYears = DateMath.getMonthAndYear(date);
         return (monthAndYears.year + parseInt(years)) + "-" + monthAndYears.month;
     },
@@ -64,6 +66,9 @@ DateMath = {
      * @return {Number} Negative if date1 comes before date2; positive if date2 comes before date1; zero if they are equal.
      */
     compare: function(date1, date2) {
+        assert(typeof date1 === "string", "Object " + date1 + "was not a date string.");
+        assert(typeof date2 === "string", "Object " + date2 + "was not a date string.");
+
         var monthAndYears1 = DateMath.getMonthAndYear(date1);
         var monthAndYears2 = DateMath.getMonthAndYear(date2);
 
@@ -88,6 +93,9 @@ DateMath = {
      * @return {Number} Negative if date1's year comes before date2's year; positive if date2's year comes before date1's year; zero if they are in the same calendar year.
      */
     compareYear: function(date1, date2) {
+        assert(typeof date1 === "string", "Object " + date1 + "was not a date string.");
+        assert(typeof date2 === "string", "Object " + date2 + "was not a date string.");
+
         var monthAndYears1 = DateMath.getMonthAndYear(date1);
         var monthAndYears2 = DateMath.getMonthAndYear(date2);
 
