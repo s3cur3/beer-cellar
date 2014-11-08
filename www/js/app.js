@@ -1,19 +1,6 @@
-function assert( testResult, optionalErrorMsg ) {
-    if( !testResult ) {
-        var errorStr = "ERROR";
-        if( optionalErrorMsg ) {
-            errorStr += ": " + optionalErrorMsg;
-        }
-
-        console.error( errorStr );
-    }
-}
 
 // selects the desired state chnage behavior depending on whether the user is logged or not
-function determineKinveyBehavior($kinvey, $state, $rootScope, UserService) {
-    var activeUser = UserService.activeUser();
-    console.log("activeUser: " + JSON.stringify(activeUser, null, 2));
-
+function determineKinveyBehavior($state, activeUser) {
     if(activeUser === null) {
         console.log("Redirecting to signin");
         $state.go('signin');
@@ -25,35 +12,44 @@ function determineKinveyBehavior($kinvey, $state, $rootScope, UserService) {
 
 angular.module('BeerCellarApp', ['ionic', 'kinvey', 'BeerCellarApp.controllers', 'BeerCellarFilters', 'BeerCellarApp.services'])
 
-    .run(['$ionicPlatform', '$kinvey', '$rootScope', '$state','UserService', function ($ionicPlatform, $kinvey, $rootScope, $state, UserService) {
+    .run(['$ionicPlatform', '$kinvey', '$rootScope', '$state', "$window", 'UserService', function ($ionicPlatform, $kinvey, $rootScope, $state, $window, UserService) {
         $ionicPlatform.ready(function() {
-            if( window.StatusBar ) {
+            if(window.StatusBar) {
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
             }
 
             // Initialize Kinvey MBaaS
-            var promise = $kinvey.init({
+            $kinvey.init({
                 appKey: 'kid_b1l19t0ZU',
-                appSecret: '173b833d9a1e4577a935cb7847767044'
-            });
-            promise.then(function () {
+                appSecret: '173b833d9a1e4577a935cb7847767044',
+                refresh: true,
+                sync: {
+                    enable: true,
+                    online : $window.navigator.onLine // set initial state
+                }
+            }).then(function(activeUser) {
                 // Kinvey initialization finished with success
-                console.log("Kinvey init with success");
-                determineKinveyBehavior($kinvey, $state, $rootScope, UserService);
+                console.log("Kinvey init with success. Active user is:", activeUser);
+                determineKinveyBehavior($state, activeUser);
 
                 // setup the stateChange listener
                 $rootScope.$on("$stateChangeStart", function (event, toState /*, toParams, fromState, fromParams*/) {
                     if(toState.name !== 'signin') {
                         console.log("Tried to change to non-signin state");
-                        determineKinveyBehavior($kinvey, $state, $rootScope,UserService);
+                        determineKinveyBehavior($state, activeUser);
                     }
                 });
 
+                // Inform Kinvey when we go offline (so it can cache things locally)
+                $(window).on({
+                    offline : $kinvey.Sync.offline,
+                    online  : $kinvey.Sync.online
+                });
             }, function(errorCallback) {
                 // Kinvey initialization finished with error
                 console.log("Kinvey init with error: " + JSON.stringify(errorCallback));
-                determineKinveyBehavior($kinvey, $state, $rootScope,UserService);
+                determineKinveyBehavior($state, activeUser);
             });
         });
     }])
@@ -204,179 +200,6 @@ angular.module('BeerCellarApp', ['ionic', 'kinvey', 'BeerCellarApp.controllers',
     })
 ;
 
-
-DateMath = {
-    /**
-     * @param date A date string formatted as: YYYY-MM
-     * @return {month: MM, year: YYYY}
-     */
-    getMonthAndYear: function(date) {
-        assert(typeof date === "string");
-
-        var arrayVersion = date.split("-");
-
-        var m = parseInt(arrayVersion[1]);
-        var q = 0;
-        if(m <= 3) {
-            q = 1;
-        } else if(m <= 6) {
-            q = 2;
-        } else if(m <= 9) {
-            q = 3;
-        } else {
-            q = 4;
-        }
-
-        return {
-            "year": parseInt(arrayVersion[0]),
-            "month": m,
-            "quarter": q
-        };
-    },
-
-    /**
-     * @param beerObj {} A beer object from the BeerService
-     * @return string A date string formatted as: YYYY-MM
-     */
-    getDrinkDate: function(beerObj) {
-        return DateMath.addYears(beerObj.purchaseDate, beerObj.drinkAfterYears);
-    },
-
-    getQuarter: function(dateString) {
-        assert(typeof dateString === "string");
-        return DateMath.getMonthAndYear(dateString).quarter;
-    },
-
-    /**
-     * @param date A date string formatted as: YYYY-MM
-     * @param years Int value, the number of years to be added
-     * @return string A date string formatted as: YYYY-MM
-     */
-    addYears: function(date, years) {
-        var monthAndYears = DateMath.getMonthAndYear(date);
-        return (monthAndYears.year + parseInt(years)) + "-" + monthAndYears.month;
-    },
-
-    /**
-     * @param date1 A date string formatted as: YYYY-MM
-     * @param date2 A date string formatted as: YYYY-MM
-     * @return number Negative if date1 comes before date2; positive if date2 comes before date1; zero if they are equal.
-     */
-    compare: function(date1, date2) {
-        var monthAndYears1 = DateMath.getMonthAndYear(date1);
-        var monthAndYears2 = DateMath.getMonthAndYear(date2);
-
-        if(monthAndYears1.year < monthAndYears2.year) {
-            return -1;
-        } else if(monthAndYears1.year > monthAndYears2.year) {
-            return 1;
-        } else { // Years are equal; compare months
-            if(monthAndYears1.month < monthAndYears2.month) {
-                return -1;
-            } else if(monthAndYears1.month > monthAndYears2.month) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-    },
-
-    /**
-     * @param date1 A date string formatted as: YYYY-MM
-     * @param date2 A date string formatted as: YYYY-MM
-     * @return number Negative if date1's year comes before date2's year; positive if date2's year comes before date1's year; zero if they are in the same calendar year.
-     */
-    compareYear: function(date1, date2) {
-        var monthAndYears1 = DateMath.getMonthAndYear(date1);
-        var monthAndYears2 = DateMath.getMonthAndYear(date2);
-
-        if(monthAndYears1.year < monthAndYears2.year) {
-            return -1;
-        } else if(monthAndYears1.year > monthAndYears2.year) {
-            return 1;
-        } else { // Years are equal; compare months
-            return 0;
-        }
-    },
-    /**
-     * @param date1 A date string formatted as: YYYY-MM
-     * @param date2 A date string formatted as: YYYY-MM
-     * @return number Negative if date1's calendar quarter comes before date2's calendar quarter; positive if date2's calendar quarter comes before date1's calendar quarter; zero if they are in the same calendar quarter.
-     */
-    compareQuarter: function(date1, date2) {
-        if(DateMath.compareYear(date1, date2) === 0) { // same year
-            var monthAndYears1 = DateMath.getMonthAndYear(date1);
-            var monthAndYears2 = DateMath.getMonthAndYear(date2);
-
-            if(monthAndYears1.quarter < monthAndYears2.quarter) {
-                return -1;
-            } else if(monthAndYears1.quarter > monthAndYears2.quarter) {
-                return 1;
-            } else {
-                return 0;
-            }
-        } else {
-            return DateMath.compareYear(date1, date2);
-        }
-    },
-
-    yearsInTheFuture: function(yearsFromNow) {
-        if(typeof yearsFromNow === "undefined")
-            yearsFromNow = 0;
-
-        var d = new Date();
-        return (d.getFullYear() + parseInt(yearsFromNow)) + "-" + (d.getMonth() + 1);
-    },
-
-    thisMonth: function() {
-        return DateMath.yearsInTheFuture(0);
-    },
-
-    monthNumberToString: function(monthNumberOneToTwelve) {
-        var monthString = "";
-        switch(monthNumberOneToTwelve) {
-            case 1:
-                monthString = "January";
-                break;
-            case 2:
-                monthString = "February";
-                break;
-            case 3:
-                monthString = "March";
-                break;
-            case 4:
-                monthString = "April";
-                break;
-            case 5:
-                monthString = "May";
-                break;
-            case 6:
-                monthString = "June";
-                break;
-            case 7:
-                monthString = "July";
-                break;
-            case 8:
-                monthString = "August";
-                break;
-            case 9:
-                monthString = "September";
-                break;
-            case 10:
-                monthString = "October";
-                break;
-            case 11:
-                monthString = "November";
-                break;
-            case 12:
-                monthString = "December";
-                break;
-            default:
-                console.error("Unknown month number:", monthAndYear.month);
-        }
-        return monthString;
-    }
-};
 
 angular.module('BeerCellarFilters', [])
     .filter('percent', function() {

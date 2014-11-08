@@ -67,13 +67,33 @@ angular.module('BeerCellarApp.controllers', [])
             return chunks;
         };
 
+        /**
+         * @param theBeer {Beer} The beer object to select as the last active one
+         */
+        $scope.selectBeer = function(theBeer) {
+            $scope.beer = theBeer;
+            BeerService.setLastActiveBeer(theBeer);
+        };
+
+        $scope.updateBeers = function() {
+            BeerService.all().then(function(allBeers) {
+                $scope.beers = allBeers;
+                $scope.beersChunkedByDate = $scope.getDatesChunked();
+            });
+        };
+
+        $scope.updateBeer = function() {
+            BeerService.lastActive().then(function(beer) {
+                $scope.beer = beer;
+            });
+        };
+
 
         // Set up beer functionality
         $scope.DateMath = DateMath;
         $scope.BeerService = BeerService;
-        $scope.beers = BeerService.allBeers();
-        $scope.beer = $scope.beers[ BeerService.getLastActiveIndex() ];
-        $scope.beersChunkedByDate = $scope.getDatesChunked();
+        $scope.updateBeers();
+        $scope.updateBeer();
         $scope.volumes = [
             "12 oz.",
             "16 oz.",
@@ -97,19 +117,22 @@ angular.module('BeerCellarApp.controllers', [])
             "Other"
         ];
 
-
-        $scope.selectBeer = function(prop, index) {
-            $scope.beer = prop;
-            BeerService.setLastActiveIndex(index || prop);
-        };
-
+        /**
+         * Checks whether the indicated beer object is ready to drink or not
+         * @param {Beer} [b] Optional: the beer object to check (defaults to the last accessed/modified beer)
+         * @return {boolean} True if the beer is ready to drink; false otherwise.
+         */
         $scope.greenLight = function(b) {
-            if (!b) b = $scope.beer;
+            if(!b) b = $scope.beer;
 
-            var drinkDateStr = DateMath.getDrinkDate(b);
-            var thisMonth = DateMath.thisMonth();
+            if(b && b.purchaseDate) {
+                var drinkDateStr = DateMath.getDrinkDate(b);
+                var thisMonth = DateMath.thisMonth();
 
-            return DateMath.compare(thisMonth, drinkDateStr) >= 0;
+                return DateMath.compare(thisMonth, drinkDateStr) >= 0;
+            } else { // beers apparently haven't been set from the DB yet
+                return false;
+            }
         };
 
 
@@ -128,8 +151,8 @@ angular.module('BeerCellarApp.controllers', [])
         };
         $scope._delete = function() {
             $scope.deleteModal.hide();
-            BeerService.delete($scope.beerToDelete);
-            $scope.beers = BeerService.allBeers();
+            BeerService.remove($scope.beerToDelete);
+            $scope.updateBeers();
             $location.path('/beers');
         };
         $scope.closeDelete = function() {
@@ -152,8 +175,7 @@ angular.module('BeerCellarApp.controllers', [])
         $scope.$watch('beer', function(updatedBeer, oldBeer) {
             if( typeof updatedBeer == "object" && updatedBeer ) {
                 BeerService.save(updatedBeer);
-                $scope.beers = BeerService.allBeers();
-                $scope.beersChunkedByDate = $scope.getDatesChunked();
+                $scope.updateBeers();
             } else {
                 console.log("Got empty beer in an update...?");
             }
@@ -163,8 +185,7 @@ angular.module('BeerCellarApp.controllers', [])
             console.log("logout");
 
             //Kinvey logout starts
-            var promise = $kinvey.User.logout();
-            promise.then(
+            $kinvey.User.logout().then(
                 function () {
                     //Kinvey logout finished with success
                     console.log("user logout");
@@ -221,20 +242,18 @@ angular.module('BeerCellarApp.controllers', [])
         console.log("In BeersCtrl");
         hideOrShowBackBtn();
 
-        $scope.beers = BeerService.allBeers();
-        if( $scope.beers.length == 0 ) {
-            $scope.beer = BeerService.newBeer();
-            $scope.beers = BeerService.allBeers();
-        }
+        $scope.updateBeers();
 
         $scope.addBeer = function() {
             console.log("Adding beer");
-            var b = BeerService.newBeer();
-            $scope.beers = BeerService.allBeers();
+            var b = BeerService.create();
+            $scope.updateBeers();
             $scope.selectBeer(b);
 
-            console.log("Setting path to " + '/beers/' + BeerService.getLastActiveIndex());
-            $location.path('/#/beers/' + BeerService.getLastActiveIndex());
+            BeerService.lastActive().then(function(beer) {
+                console.log("Setting path to /#/beers/" + beer._id);
+                $location.path('/#/beers/' + beer._id);
+            });
         }
     }])
 
@@ -244,8 +263,11 @@ angular.module('BeerCellarApp.controllers', [])
 
         // Update the currently-in-use beer when we load this one
         var re = /[0-9]+$/;
-        var id = $location.url().match(re);
-        $scope.selectBeer( BeerService.getBeerByID(id) );
+        var theID = $location.url().match(re);
+
+        BeerService.find(theID).then(function(beer) {
+            $scope.selectBeer(beer);
+        });
     }])
 
     .controller('PhotoCtrl', ['$scope', 'CameraFactory', function($scope, CameraFactory) {

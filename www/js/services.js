@@ -51,6 +51,7 @@ angular.module('BeerCellarApp.services', [])
              */
             activeUser: function () {
                 if (currentUser === null) {
+                    console.log("Refreshing active user!");
                     currentUser = User.build($kinvey.getActiveUser());
                 }
                 return currentUser;
@@ -63,6 +64,7 @@ angular.module('BeerCellarApp.services', [])
              */
             login: function (_username, _password) {
                 //Kinvey login starts
+                console.log("Logging in user ", _username);
                 var promise = $kinvey.User.login({
                     username: _username,
                     password: _password
@@ -79,6 +81,7 @@ angular.module('BeerCellarApp.services', [])
             },
 
             createUser: function(_username, _password) {
+                console.log("Creating user ", _username);
                 var promise = $kinvey.User.signup({
                     username : _username,
                     password : _password
@@ -95,263 +98,166 @@ angular.module('BeerCellarApp.services', [])
         };
     })
 
-    .factory('AvatarService', function ($kinvey, Avatar) {
-        return {
-            /**
-             *
-             * @returns {*}
-             */
-            find: function() {
-                var query = new $kinvey.Query();
-                var promise = $kinvey.File.find(query).then(function(_data) {
-                    console.log("find: " + JSON.stringify(_data));
-                    return _data
-                        .map(Avatar.build)
-                        .filter(Boolean);
-                }, function error(err) {
-                    console.log('[find] received error: ' + JSON.stringify(err));
-                });
+    .factory('Beer', function () {
 
-                return promise;
-            },
-            /**
-             *
-             * @param {String} _id
-             * @returns {*}
-             */
-            remove: function(_id) {
-                return $kinvey.File.destroy(_id);
-            },
-            /**
-             *
-             * @param {String} _id
-             * @returns {*}
-             */
-            get: function(_id) {
-                // create the kinvey file object
-                var promise = $kinvey.File.download(_id).then(function(_data) {
-                    console.log("download: " + JSON.stringify(_data));
-                    return Avatar.build(_data);
-                }, function error(err) {
-                    console.log('[download] received error: ' + JSON.stringify(err));
-                });
+        /**
+         * A beer in our collection
+         * @constructor
+         */
+        function Beer() {
+            this.name = "New beer";
+            this.brewery = "Unknown";
+            this.images = [];
+            this.volume = "22 oz.";
+            this.quantity = 1;
+            this.style = "IPA";
+            this.purchasePrice = 10;
+            this.purchaseDate = DateMath.thisMonth();
+            this.drinkAfterYears = 3;
+            this.drinkBeforeYears = 6;
+        }
 
-                return promise;
-            },
-            /**
-             *
-             * @param {File} _file
-             * @returns {*}
-             */
-            upload: function(_file) {
-                var promise = $kinvey.File.upload(_file.file, {
-                    _filename: _file.file.name,
-                    public: true,
-                    size: _file.file.size,
-                    mimeType: _file.file.type
-                }).then(function(_data) {
-                    console.log("$upload: " + JSON.stringify(_data));
-                    return Avatar.build(_data);
-                }, function error(err) {
-                    console.log('[$upload] received error: ' + JSON.stringify(err));
-                });
-
-                return promise;
-            }
-        };
-    })
-
-    .service('BeerService', function() {
-        var _Beer = function(newID) {
-            if( typeof newID === "undefined" ) newID = _this._getNextID();
-
-            return {
-                id: newID,
-                name: "New beer",
-                brewery: "Unknown",
-
-                images: [],
-
-                volume: "22 oz.",
-                quantity: 1,
-                style: "IPA",
-                purchasePrice: 10,
-                purchaseDate: DateMath.thisMonth(),
-                drinkAfterYears: 3,
-                drinkBeforeYears: 6
-            }
-        };
-
-        this._getNextID = function() {
-            var all = _this.allBeers();
-
-            var id;
-            if( all.length > 0 ) {
-                id = all[ all.length - 1 ].id + 1;
-                console.log("Found ID to be " + id);
-            } else {
-                id = 0;
-                console.log("No known beers!");
-                console.log(all);
-            }
-
-            return id;
-        };
-
-        this.newBeer = function() {
-            var prop = _Beer();
-            console.log("Created new beer with ID " + prop.id);
-            _this.save(prop);
-
-            _this.setLastActiveIndex(prop.id);
-            return  prop;
-        };
-
-        this.getBeerByID = function(id) {
-            var beers = _this.allBeers();
-
-
-            if( beers.length > 0 ) {
-                for( var i = 0; i < beers.length; i++ ) {
-                    if( beers[i].id == id ) {
-                        return beers[i];
-                    }
-                }
-
-                console.error("Couldn't find beer with ID " + id);
-                return beers[0];
-            }
-            return _this.newBeer();
-        };
-
-        this.allBeers = function() {
-            // TODO: This is RIDICULOUSLY inefficient --- it's called all the damn time!
-            var beersString = window.localStorage['beers'];
-            var newBeers = [];
-            if(beersString) {
-                var beers = angular.fromJson(beersString);
-
-                if( !Array.isArray(beers) ) {
-                    console.error("Stored beers list was not an array! Creating a new beers list...");
-                    newBeers.push(_Beer(0));
-                    return newBeers;
-                } else {
-                    // TODO: Remove this?
-                    // Nuke any beers without an id
-                    _.remove( beers, function(prop) {
-                        if( typeof prop == "object" && prop ) {
-                            if(prop.id == null) console.error("Found a beer without an ID set. Removing it...");
-                            return prop.id == null;
-                        }
-
-                        console.error("Found a beer that wasn't an object. Removing it...");
-                        return true; // Not an object; what's it doing here??
-                    });
-
-                    return beers;
-                }
-            } else {
-                console.log("No beer list stored. Creating a new one...");
-                newBeers.push(_Beer(0));
-                return newBeers;
-            }
+        /**
+         * @return {string} Name of the beer
+         */
+        Beer.prototype.getName = function () {
+            return this.name;
         };
 
         /**
-         * If beer already exists in the list of beers, it will
-         * be updated. If it does not exist, we will append it.
-         * @param beer {*}
-         * @param beers Array
-         * @returns Array The updated beers array
-         * @private
+         * @return {string} The volume (e.g., "22 oz." or "750 mL")
          */
-        this._addBeerToBeers = function( beer, beers ) {
-            var foundBeer = false;
-            for( var i = 0; i < beers.length; i++ ) {
-                if( beers[i].id === beer.id ) {
-                    foundBeer = true;
-                    beers[i] = beer;
-                    break;
+        Beer.prototype.getVolume = function () {
+            return this.volume;
+        };
+
+        /**
+         * @return {Number} The number of bottles of this beer (with this volume, purchase date, and drink date) in the collection
+         */
+        Beer.prototype.getQuantity = function () {
+            return this.quantity;
+        };
+
+        /**
+         * @return {string} A date string (YYYY-MM format) indicating when this beer may be drank
+         */
+        Beer.prototype.getDrinkDate = function () {
+            return DateMath.addYears(this.purchaseDate, this.drinkAfterYears);
+        };
+
+        /**
+         * @return {string} A date string (YYYY-MM format) indicating the *latest* that this beer should be drank
+         */
+        Beer.prototype.getDrinkBeforeDate = function () {
+            return DateMath.addYears(this.purchaseDate, this.drinkBeforeYears);
+        };
+
+
+        /**
+         * Static method, assigned to class
+         * Instance ('this') is not available in static context
+         */
+        Beer.build = function() {
+            return new Beer();
+        };
+
+        /**
+         * @return {*} A promise to create a new beer object
+         */
+        Beer.buildPromise = function() {
+            var b = Beer.build();
+            return {
+                then: function() {
+                    return b;
                 }
-            }
-
-            if( !foundBeer ) {
-                beers.push(beer);
-            }
-
-            return beers;
+            };
         };
 
-        this._orderBeers = function( beers ) {
-            function sortByID(a, b){
-                return ((a.id < b.id) ? -1 : ((a.id > b.id) ? 1 : 0));
-            }
-
-            beers.sort(sortByID);
-            return beers;
-        };
-
-        this.save = function(beerOrBeers) {
-            var beers = [];
-            if(!Array.isArray(beerOrBeers)) {
-                beers = _this.allBeers();
-
-                var b = beerOrBeers;
-                assert( typeof b == "object", "Beer is not an object" );
-                beers =  _this._addBeerToBeers( b, beers );
-            } else {
-                beers = beerOrBeers;
-            }
-
-            beers = _this._orderBeers(beers);
-
-            // TODO: make this more efficient?
-            window.localStorage['beers'] = angular.toJson(beers);
-        };
-
-        this.delete = function( beer ) {
-            console.log("Deleting beer", beer);
-            var beers = _this.allBeers();
-            _.remove(beers, function(prop) {
-                return prop.id == beer.id;
-            });
-            _this.save(beers);
-        };
-
-        this.getLastActiveIndex = function() {
-            var lastActive = window.localStorage['lastActiveBeer'];
-            if( lastActive === undefined ||
-                lastActive == null ||
-                lastActive == "undefined" ) {
-                lastActive = -1;
-            }
-            return parseInt(lastActive);
-        };
-
-        this.setLastActiveIndex = function( indexOrBeer ) {
-            if( typeof indexOrBeer == "number" ) {
-                window.localStorage['lastActiveBeer'] = indexOrBeer;
-            } else {
-                window.localStorage['lastActiveBeer'] = _this._getIndexOfBeer(indexOrBeer);
-            }
-
-        };
-
-        this._getIndexOfBeer = function( prop ) {
-            assert(typeof prop == "object", "Sought beer is not a valid beer object.");
-
-            var all = _this.allBeers();
-            for( var i = 0; i < all.length; i++ ) {
-                if( all[i].id == prop.id ) {
-                    return i;
-                }
-            }
-            return -1;
-        };
-
-        var _this = this;
+        /**
+         * Return the constructor function
+         */
+        return Beer;
     })
 
+    .factory('BeerService', function ($kinvey, Beer) {
+        var DEBUG_BEER_SERVICE = true;
+        return {
+            /**
+             * Search for a particular beer in the database
+             * @param _id The ID of the beer to search for
+             * @return {*} A promise to return the sought beer
+             */
+            find: function(_id) {
+                if(DEBUG_BEER_SERVICE) console.log("Finding beer with ID", _id);
+                return $kinvey.DataStore.get('beers', _id);
+            },
+
+            /**
+             * Deletes a beer from the database
+             * @param {Beer} beer The beer to delete
+             * @returns {*} a promise to destroy the beer
+             */
+            remove: function(beer) {
+                if(DEBUG_BEER_SERVICE) console.log("Deleting beer", beer);
+                return $kinvey.DataStore.destroy(beer._id);
+            },
+
+            /**
+             * Saves a beer to the database
+             * @param {Beer} beer The beer you'd like to save
+             * @returns {*} a promise to save the beer
+             */
+            save: function(beer) {
+                //window.localStorage['beers'] = angular.toJson(beers);
+                if(DEBUG_BEER_SERVICE) console.log("Saving beer", beer);
+                return $kinvey.DataStore.save('beers', beer);
+            },
+
+            /**
+             * Fetches all beers in this user's collection
+             * @returns {*} a promise to get all the beers
+             */
+            all: function() {
+                if(DEBUG_BEER_SERVICE) console.log("Getting all beers");
+                return $kinvey.DataStore.find('beers');
+            },
+
+            /**
+             * @return {Beer} A new beer object
+             */
+            create: function() {
+                if(DEBUG_BEER_SERVICE) console.log("Created new beer");
+                var b = Beer.build();
+                this.save(b);
+                return b;
+            },
+
+            /**
+             * @return {*} A promise to retrieve the beer that was last accessed/modified by the user
+             */
+            lastActive: function() {
+                if(DEBUG_BEER_SERVICE) console.log("Getting last active beer");
+
+                var lastActive = window.localStorage['lastActiveBeerID'];
+
+                if(lastActive === undefined ||
+                    lastActive == null ||
+                    typeof lastActive == "undefined") {
+                    return Beer.buildPromise();
+                }
+
+                return this.find(lastActive);
+            },
+
+            /**
+             * @param beer {Beer} The most recently accessed/modified beer
+             */
+            setLastActiveBeer: function(beer) {
+                if(DEBUG_BEER_SERVICE) console.log("Setting last active beer to:", beer);
+                window.localStorage['lastActiveBeerID'] = beer._id;
+            }
+        };
+    })
 
     .factory('CameraFactory', ['$q', function($q) {
         if( ionic.Platform.isWebView() && ionic.Platform.isReady ) { // running in the Cordova Web view
