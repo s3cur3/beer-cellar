@@ -9,14 +9,15 @@ function assert( testResult, optionalErrorMsg ) {
     }
 }
 
-//function selects the desired behavior depending on whether the user is logged or not
+// selects the desired state chnage behavior depending on whether the user is logged or not
 function determineKinveyBehavior($kinvey, $state, $rootScope, UserService) {
     var activeUser = UserService.activeUser();
-    console.log("$state: ", $state);
-    console.log("activeUser: " + JSON.stringify(activeUser,null,2));
-    if ((activeUser === null)) {
+    console.log("activeUser: " + JSON.stringify(activeUser, null, 2));
+
+    if(activeUser === null) {
+        console.log("Redirecting to signin");
         $state.go('signin');
-    } else if (($state.current.name === 'sign-in') && (activeUser !== null)) {
+    } else if($state.current.name === 'sign-in') {
         $state.go('app.dates');
     }
 }
@@ -43,12 +44,13 @@ angular.module('BeerCellarApp', ['ionic', 'kinvey', 'BeerCellarApp.controllers',
 
                 // setup the stateChange listener
                 $rootScope.$on("$stateChangeStart", function (event, toState /*, toParams, fromState, fromParams*/) {
-                    if (toState.name !== 'signin') {
+                    if(toState.name !== 'signin') {
+                        console.log("Tried to change to non-signin state");
                         determineKinveyBehavior($kinvey, $state, $rootScope,UserService);
                     }
                 });
 
-            }, function (errorCallback) {
+            }, function(errorCallback) {
                 // Kinvey initialization finished with error
                 console.log("Kinvey init with error: " + JSON.stringify(errorCallback));
                 determineKinveyBehavior($kinvey, $state, $rootScope,UserService);
