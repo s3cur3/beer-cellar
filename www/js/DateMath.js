@@ -34,8 +34,8 @@ DateMath = {
      */
     getDrinkDate: function(beerObj) {
         assert(beerObj, "Beer object is empty");
-        assert(beerObj.purchaseDate, "Beer object has no purchase date");
-        assert(beerObj.drinkAfterYears, "Beer object has drink-after years");
+        assert(typeof beerObj.purchaseDate === "string", "Beer object has no purchase date");
+        assert(typeof beerObj.drinkAfterYears === "number", "Beer object has no drink-after years");
         return DateMath.addYears(beerObj.purchaseDate, beerObj.drinkAfterYears);
     },
 

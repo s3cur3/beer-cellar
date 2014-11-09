@@ -2,7 +2,10 @@
 
 var appVersion = version.basic;
 
-
+// a temporary random string; gets reset once we know the username
+// we use this in the ID when creating objects in the database
+var uuid = Math.random().toString(36).substring(7);
+var deletedIDs = [];
 
 
 

@@ -23,9 +23,9 @@
 
 
                 <!-- Most recent beer stuff (only shows if the user has ever looked at a beer) -->
-                <div class="item spacer" ng-show="beerService.getLastActiveIndex() != -1">
+                <div class="item spacer" ng-show="beer.name">
                 </div>
-                <group label="Most Recent Beer" id="menu-most-recent-beer" ng-show="BeerService.getLastActiveIndex() != -1">
+                <group label="Most Recent Beer" id="menu-most-recent-beer" ng-show="beer.name">
                     <ion-item nav-clear menu-close href="#/app/beers/{{BeerService.getLastActiveIndex() + 1}}" class="item-icon-left">
                         <i class="icon ion-edit"></i>
                         {{beer.name}}

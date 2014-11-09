@@ -115,6 +115,8 @@ angular.module('BeerCellarApp.services', [])
             this.purchaseDate = DateMath.thisMonth();
             this.drinkAfterYears = 3;
             this.drinkBeforeYears = 6;
+            // I'm *really* afraid of collisions!
+            this._id = parseInt(Math.random() * 1000).toString() + uuid + Date.now();
         }
 
         /**
@@ -189,7 +191,13 @@ angular.module('BeerCellarApp.services', [])
              */
             find: function(_id) {
                 if(DEBUG_BEER_SERVICE) console.log("Finding beer with ID", _id);
-                return $kinvey.DataStore.get('beers', _id);
+
+                if(_id === null || typeof _id === "undefined") {
+                    assert(typeof _id === "string");
+                    return Beer.buildPromise();
+                } else {
+                    return $kinvey.DataStore.get('beers', _id);
+                }
             },
 
             /**
@@ -199,7 +207,8 @@ angular.module('BeerCellarApp.services', [])
              */
             remove: function(beer) {
                 if(DEBUG_BEER_SERVICE) console.log("Deleting beer", beer);
-                return $kinvey.DataStore.destroy(beer._id);
+                deletedIDs.push(beer._id);
+                return $kinvey.DataStore.destroy('beers', beer._id);
             },
 
             /**
@@ -208,9 +217,15 @@ angular.module('BeerCellarApp.services', [])
              * @returns {*} a promise to save the beer
              */
             save: function(beer) {
-                //window.localStorage['beers'] = angular.toJson(beers);
                 if(DEBUG_BEER_SERVICE) console.log("Saving beer", beer);
-                return $kinvey.DataStore.save('beers', beer);
+                if(_.contains(deletedIDs, beer._id)) {
+                    return {
+                        then: function() {}
+                    };
+                } else {
+                    return $kinvey.DataStore.save('beers', beer);
+                }
+
             },
 
             /**
@@ -234,13 +249,12 @@ angular.module('BeerCellarApp.services', [])
             },
 
             /**
-             * @return {Beer} A new beer object
+             * @return {*} A promise to create a new beer object
              */
             create: function() {
                 if(DEBUG_BEER_SERVICE) console.log("Created new beer");
                 var b = Beer.build();
-                this.save(b);
-                return b;
+                return this.save(b);
             },
 
             /**
@@ -261,6 +275,7 @@ angular.module('BeerCellarApp.services', [])
             },
 
             /**
+             * Synchronously remembers the most recently accessed beer
              * @param beer {Beer} The most recently accessed/modified beer
              */
             setLastActiveBeer: function(beer) {

@@ -3,7 +3,7 @@
 function determineKinveyBehavior($window, activeUser) {
     if(activeUser === null) {
         console.log("Redirecting to signin");
-        $window.location = '#/app/signin';
+        $window.location = '#/app/sign-in';
     } else if($window.location.toString().indexOf('sign-in') !== -1) {
         $window.location = '#/app/dates';
     }
@@ -28,6 +28,8 @@ $injector.invoke(["$kinvey", "$window", "$rootScope", function($kinvey, $window,
         console.log("Kinvey init with success. Active user is:", activeUser);
 
         angular.bootstrap(document, ['BeerCellarApp']);
+
+        uuid = activeUser.username;
 
         determineKinveyBehavior($window, activeUser);
 
@@ -64,7 +66,6 @@ beerCellarApp
     // Define our routes
     .config(function( $stateProvider, $urlRouterProvider ) {
         $stateProvider
-
             .state('app', {
                 url: "/app",
                 abstract: true,
@@ -116,7 +117,7 @@ beerCellarApp
 
         ;
         // if none of the above states are matched, use this as the fallback
-        $urlRouterProvider.otherwise('/sign-in');
+        $urlRouterProvider.otherwise('app/dates');
     })
 
     .config(function($compileProvider){
