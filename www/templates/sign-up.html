@@ -14,6 +14,13 @@
             </label>
             <input value="Create Account" type="submit" class="button button-block button-positive" ng-click="createUser(user)">
             <span class="error" ng-show="submittedError">{{errorDescription}}</span>
+
+            <div class="item spacer invisible">
+            </div>
+
+            <a class="item button button-full" href="#/sign-in">
+                Sign in instead
+            </a>
         </form>
     </ion-content>
 </ion-view>

@@ -1,11 +1,11 @@
 
 // selects the desired state chnage behavior depending on whether the user is logged or not
 function determineKinveyBehavior($window, activeUser) {
-    if(activeUser === null) {
+    if(activeUser === null || !activeUser) {
         console.log("Redirecting to signin");
-        $window.location = '#/app/sign-in';
-    } else if($window.location.toString().indexOf('sign-in') !== -1) {
-        $window.location = '#/app/dates';
+        $window.location = 'sign-in';
+    } else if($window.location.toString().indexOf('sign-in') > -1) {
+        $window.location = 'app/dates';
     }
 }
 var beerCellarApp = angular.module('BeerCellarApp', ['ionic', 'kinvey', 'BeerCellarApp.controllers', 'BeerCellarFilters', 'BeerCellarApp.services']);
@@ -117,7 +117,7 @@ beerCellarApp
 
         ;
         // if none of the above states are matched, use this as the fallback
-        $urlRouterProvider.otherwise('app/dates');
+        $urlRouterProvider.otherwise('sign-in');
     })
 
     .config(function($compileProvider){
