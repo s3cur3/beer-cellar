@@ -237,10 +237,16 @@ angular.module('BeerCellarApp.controllers', [])
 
     .controller('SignInCtrl', ['$scope', '$kinvey', '$state', 'UserService', function ($scope, $kinvey, $state, UserService) {
         console.log('Sign In Ctrl');
+
+        if(UserService.activeUser()) {
+            console.log("Had active user!");
+            $state.go("app.dates");
+        }
+
         $scope.signIn = function (user) {
             console.log('Sign In', user);
 
-            UserService.login(user.username, user.password).then(function(response) {
+            UserService.login(user.username.toLowerCase(), user.password).then(function(response) {
                     //Kinvey login finished with success
                     $scope.submittedError = false;
                     $state.go('app.dates');
@@ -259,7 +265,7 @@ angular.module('BeerCellarApp.controllers', [])
         $scope.createUser = function(user) {
             console.log('Sign Up', user);
 
-            UserService.createUser(user.username, user.password).then(function(response) {
+            UserService.createUser(user.username.toLowerCase(), user.password).then(function(response) {
                     // Kinvey login finished with success
                     $scope.submittedError = false;
                     $state.go('app.dates');
