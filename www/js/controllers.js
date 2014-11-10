@@ -30,7 +30,7 @@ function hideOrShowBackBtn() {
 
 angular.module('BeerCellarApp.controllers', [])
 
-    .controller('AppCtrl', ['$scope', '$kinvey', '$state', '$location', '$ionicModal', '$filter', 'BeerService', 'CameraFactory', function($scope, $kinvey, $state, $location, $ionicModal, $filter, BeerService, CameraFactory) {
+    .controller('AppCtrl', ['$scope', '$kinvey', '$state', '$location', '$ionicModal', '$filter', 'BeerService', 'UserService', 'CameraFactory', function($scope, $kinvey, $state, $location, $ionicModal, $filter, BeerService, UserService, CameraFactory) {
         $scope.getDatesChunked = function() {
             var chunks = [];
 
@@ -93,10 +93,11 @@ angular.module('BeerCellarApp.controllers', [])
         };
 
         /**
-         * @param {bool} [updateLastActive] Should we update $scope.beer? (Defaults to false)
+         * @param {boolean} [updateLastActive] Should we update $scope.beer? (Defaults to false)
          * @return {*} A promise to update the beers
          */
         $scope.updateBeers = function(updateLastActive) {
+            console.log("$scope.updateBeers()");
             return BeerService.all().then(function(allBeers) {
                 console.log("Updated $scope.beers to:", allBeers);
                 $scope.beers = allBeers;
@@ -126,13 +127,9 @@ angular.module('BeerCellarApp.controllers', [])
             }
         };
 
-        // Set up beer functionality
+
         $scope.beers = [];
         $scope.beer =  {};
-        $scope.updateBeers(true);
-
-        // Clean up Kinvey data
-        //BeerService.clean();
 
         $scope.DateMath = DateMath;
         $scope.BeerService = BeerService;
@@ -158,6 +155,27 @@ angular.module('BeerCellarApp.controllers', [])
             "Barleywine",
             "Other"
         ];
+
+
+        // Check that we're signed in
+        if(!UserService.activeUser()) {
+            console.error("Not logged in!");
+            $location.url('/sign-in');
+            setTimeout(function(){
+                console.error($location.path());
+                $location.url('/sign-in');
+            }, 1000);
+        }
+
+
+        console.log("Calling for initial update of beers");
+        $scope.updateBeers(true).then(function() {
+            console.log("Succeeded updating beers!");
+        }, function(failureEvent) {
+            console.error("Failed to update beers initially!\n" + failureEvent.name + ": " + failureEvent.description);
+        });
+
+
 
         /**
          * Checks whether the indicated beer object is ready to drink or not
@@ -237,11 +255,17 @@ angular.module('BeerCellarApp.controllers', [])
 
     .controller('SignInCtrl', ['$scope', '$kinvey', '$state', 'UserService', function ($scope, $kinvey, $state, UserService) {
         console.log('Sign In Ctrl');
+        $scope.redirectIfLoggedIn = function() {
+            if(UserService.activeUser()) {
+                console.log("Had active user!");
+                $state.go("app.dates");
+            } else {
+                setTimeout($scope.redirectIfLoggedIn, 1000);
+            }
+        };
 
-        if(UserService.activeUser()) {
-            console.log("Had active user!");
-            $state.go("app.dates");
-        }
+        setTimeout($scope.redirectIfLoggedIn, 500);
+
 
         $scope.signIn = function (user) {
             console.log('Sign In', user);

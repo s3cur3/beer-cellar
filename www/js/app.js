@@ -117,7 +117,7 @@ beerCellarApp
 
         ;
         // if none of the above states are matched, use this as the fallback
-        $urlRouterProvider.otherwise('sign-in');
+        $urlRouterProvider.otherwise('app/dates?wtf');
     })
 
     .config(function($compileProvider){
