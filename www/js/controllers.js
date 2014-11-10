@@ -171,8 +171,11 @@ angular.module('BeerCellarApp.controllers', [])
         console.log("Calling for initial update of beers");
         $scope.updateBeers(true).then(function() {
             console.log("Succeeded updating beers!");
-        }, function(failureEvent) {
-            console.error("Failed to update beers initially!\n" + failureEvent.name + ": " + failureEvent.description);
+        }, function(errorObj) {
+            console.error("Failed to update beers initially!\n" + errorObj.name + ": " + errorObj.description, errorObj);
+            if(errorObj.name === Kinvey.Error.DATABASE_ERROR) {
+                console.log("Was a DB error");
+            }
         });
 
 

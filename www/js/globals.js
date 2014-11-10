@@ -1,5 +1,5 @@
 
-
+var KINVEY_DEBUG = true;
 var appVersion = version.basic;
 
 // a temporary random string; gets reset once we know the username
