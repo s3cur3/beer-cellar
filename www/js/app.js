@@ -148,7 +148,7 @@ beerCellarApp
                 '<label class="item" ng-click="$parent.makeEditable(label)">' +
                     '{{label}}' +
                     '<span class="item-field" ng-show="!$parent.isEditable(label)">{{prefix}}{{model}} {{suffix}}</span>' +
-                    '<input class="item-field" ng-show="$parent.isEditable(label)" ng-blur="$parent.clearEditable(label)" type="number" class="right" ng-model="model">' +
+                    '<input class="item-field" ng-class="{\'pseudo-hide\': !$parent.isEditable(label)}" ng-blur="$parent.clearEditable(label)" ng-focus="$parent.makeEditable(label)" type="number" class="right" ng-model="model">' +
                 '</number-field>'
         };
     })

@@ -63,6 +63,9 @@ input[type=text].item-field {
     margin-top: 12px;
     right: 0;
 }
+.pseudo-hide {
+    opacity: 0;
+}
 
 
 /** Lists **/

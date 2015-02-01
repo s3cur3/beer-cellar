@@ -154,6 +154,7 @@ angular.module('BeerCellarApp.controllers', [])
             "Tripel",
             "Quadruppel",
             "Barleywine",
+            "Sour/Wild Ale",
             "Other"
         ];
 
