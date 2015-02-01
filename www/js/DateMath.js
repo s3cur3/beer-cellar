@@ -29,6 +29,15 @@ DateMath = {
     },
 
     /**
+     * @param date {string} A date string formatted as: YYYY-MM
+     * @return {string} A string like: "February 2014"
+     */
+    makeHumanReadable: function(date) {
+        var monthAndYr = DateMath.getMonthAndYear(date);
+        return DateMath.monthNumberToString(monthAndYr.month) + " " + monthAndYr.year;
+    },
+
+    /**
      * @param beerObj {Beer} A beer object from the BeerService
      * @return {string} A date string formatted as: YYYY-MM
      */
@@ -56,8 +65,9 @@ DateMath = {
     addYears: function(date, years) {
         assert(typeof date === "string", "Object " + date + " was not a date string.");
         assert(typeof years === "number", "Years value " + years + " was not a number.");
-        var monthAndYears = DateMath.getMonthAndYear(date);
-        return (monthAndYears.year + parseInt(years)) + "-" + monthAndYears.month;
+        var dateJsObj = Date.parse(date);
+        dateJsObj = dateJsObj.add(years).years();
+        return (dateJsObj.getFullYear() + "-" + (dateJsObj.getMonth() + 1));
     },
 
     /**

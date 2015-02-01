@@ -30,6 +30,11 @@
                 <month-field label="Purchase Date" ng-model="beer.purchaseDate"></month-field>
                 <number-field label="Drink After" ng-model="beer.drinkAfterYears" suffix="years"></number-field>
                 <number-field label="Drink Before" ng-model="beer.drinkBeforeYears" suffix="years"></number-field>
+                <label class="item item-input">
+                    <div class="input-label">Calculated Drink Date</div>
+                    <span class="simulate-input item-field">{{beer | drinkDate}}</span>
+                </label>
+
             </group>
 
             <div class="item spacer invisible">

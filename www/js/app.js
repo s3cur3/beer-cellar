@@ -202,7 +202,7 @@ beerCellarApp
             template:
                 '<label class="input-number item simulate-input-container">' +
                     '{{label}}' +
-                    '<span class="simulate-input item-field" id="allInPrice"><div ng-transclude></span>' +
+                    '<span class="simulate-input item-field"><div ng-transclude></span>' +
                 '</calculated-field>'
         };
     })
@@ -247,6 +247,19 @@ angular.module('BeerCellarFilters', [])
             var monthAndYear = DateMath.getMonthAndYear(date);
             var monthString = DateMath.monthNumberToString(monthAndYear.month);
             return monthString + " " + monthAndYear.year;
+        };
+    })
+    .filter('drinkDate', function() {
+        /**
+         * @param beer A BeerService _Beer object
+         */
+        return function(beer) {
+            if(Object.keys(beer).length > 0) {
+                console.log("Filtering:", beer);
+                return DateMath.makeHumanReadable(DateMath.getDrinkDate(beer));
+            } else {
+                return "";
+            }
         };
     })
     .filter('style', function() {

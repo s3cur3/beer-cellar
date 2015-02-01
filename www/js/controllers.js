@@ -102,6 +102,7 @@ angular.module('BeerCellarApp.controllers', [])
                 console.log("Updated $scope.beers to:", allBeers);
                 $scope.beers = allBeers;
                 $scope.beersChunkedByDate = $scope.getDatesChunked();
+                console.log("Chunked by date:", $scope.beersChunkedByDate);
 
                 if(updateLastActive) {
                     BeerService.lastActive().then(function(b) {
