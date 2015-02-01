@@ -1,0 +1,22 @@
+<ion-view title="Bottles of {{beerType}} in the Cellar">
+    <ion-nav-buttons side="left">
+        <button menu-toggle="left" class="button button-icon icon ion-navicon menu-button"></button>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+        <button class="button button-icon" ng-click="addBeer()">
+            <i class="icon ion-compose positive"></i><!-- ion-ios7-plus-empty? -->
+        </button>
+    </ion-nav-buttons>
+    <ion-content class="has-header">
+        <ion-list>
+            <ion-item ng-repeat="b in typesBeers" href="#/app/beers/{{b._id}}">
+                <p>{{b.brewery}}</p>
+                <h2>{{b.name}}</h2>
+                <div class="badge" ng-show="b.volume != ''" ng-if="b.purchaseDate && b.drinkAfterYears">
+                    {{DateMath.addYears(b.purchaseDate, b.drinkAfterYears) | dateString}}
+                    <span class="badge badge-positive" ng-show="b.quantity > 1">{{b.quantity}}</span>
+                </div>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>

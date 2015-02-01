@@ -156,6 +156,26 @@ beerCellarApp
                 }
             })
 
+            .state('app.beerTypes', {
+                url: "/types",
+                views: {
+                    'menuContent': {
+                        templateUrl: "templates/names.html",
+                        controller: 'BeerTypesCtrl'
+                    }
+                }
+            })
+
+            .state('app.beerType', {
+                url: "/types/:beerType",
+                views: {
+                    'menuContent': {
+                        templateUrl: "templates/name.html",
+                        controller: 'BeerTypeCtrl'
+                    }
+                }
+            })
+
         ;
         // if none of the above states are matched, use this as the fallback
         $urlRouterProvider.otherwise('app/dates?wtf');

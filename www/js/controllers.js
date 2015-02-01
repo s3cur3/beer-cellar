@@ -188,6 +188,11 @@ angular.module('BeerCellarApp.controllers', [])
             $location.path('app/breweries/' + brewery);
         };
 
+
+        $scope.navigateToBeerType = function(name) {
+            $location.path('app/types/' + name);
+        };
+
         $scope.saveModifiedBeer = function() {
             console.log("Saving $scope.beer...");
             assert(typeof $scope.beer === "object");
@@ -400,7 +405,27 @@ angular.module('BeerCellarApp.controllers', [])
                 }
             }
         });
+    }])
 
+    .controller('BeerTypesCtrl', ['$scope', '$location', '$filter', function($scope, $location, $filter) {
+        console.log("In BeerTypesCtrl");
+        hideOrShowBackBtn();
+    }])
+
+    .controller('BeerTypeCtrl', ['$scope', '$location', '$filter', function($scope, $location, $filter) {
+        console.log("In BeerTypeCtrl");
+        hideOrShowBackBtn();
+
+        // Update the currently-in-use brewery when we load this one
+        var re = /[^\/]+$/; // matches everything from the last / to the end of the string
+        $scope.beerType = $location.url().match(re)[0];
+        $scope.beerType = $scope.beerType.replace("%20", " ");
+
+        $scope.$watch('beers', function() {
+            $scope.typesBeers = _.filter($scope.beers, function(beer) {
+                return beer.name && beer.name === $scope.beerType;
+            });
+        });
     }])
 
     .controller('BeerCtrl', ['$scope', '$location', 'BeerService', function($scope, $location, BeerService) {

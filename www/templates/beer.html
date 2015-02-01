@@ -36,14 +36,17 @@
                 </label>
 
             </group>
-            <pre>{{ beer }}</pre>
 
 
             <div class="item spacer invisible">
             </div>
 
             <button class="item button button-full button-positive" ng-click="addBeer(beer)">
+                <i class="icon ion-ios7-plus mr10"></i>
                 Cellar another of this beer
+            </button>
+            <button class="item button button-full button-positive" ng-click="navigateToBeerType(beer.name)">
+                All bottles of {{ beer.name }} in the cellar
             </button>
             <button class="item button button-full button-positive" ng-click="navigateToBrewery(beer.brewery)">
                 More beers from {{ beer.brewery }}
