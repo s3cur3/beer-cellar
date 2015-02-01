@@ -269,7 +269,6 @@ angular.module('BeerCellarFilters', [])
          */
         return function(beer) {
             if(Object.keys(beer).length > 0) {
-                console.log("Filtering:", beer);
                 return DateMath.makeHumanReadable(DateMath.getDrinkDate(beer));
             } else {
                 return "";

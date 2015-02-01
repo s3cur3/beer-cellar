@@ -123,6 +123,21 @@ angular.module('BeerCellarApp.controllers', [])
             });
         };
 
+        $scope.addBeer = function(optionalBeerToClone) {
+            console.log("Adding beer");
+            if(optionalBeerToClone) console.log("Clone of:", optionalBeerToClone);
+            BeerService.create(optionalBeerToClone).then(function(b) {
+                $scope.selectBeer(b); // synchronous
+                $scope.updateBeers().then(function() {
+                    BeerService.lastActive().then(function(beer) {
+                        console.log("Setting path to /#/beers/" + beer._id);
+                        $scope.beer = beer;
+                        $location.path('app/beers/' + beer._id);
+                    });
+                });
+            });
+        };
+
         $scope.saveModifiedBeer = function() {
             console.log("Saving $scope.beer...");
             assert(typeof $scope.beer === "object");
@@ -327,20 +342,6 @@ angular.module('BeerCellarApp.controllers', [])
     .controller('BeersCtrl', ['$scope', '$location', 'BeerService', function($scope, $location, BeerService) {
         console.log("In BeersCtrl");
         hideOrShowBackBtn();
-
-        $scope.addBeer = function() {
-            console.log("Adding beer");
-            BeerService.create().then(function(b) {
-                $scope.selectBeer(b); // synchronous
-                $scope.updateBeers().then(function() {
-                    BeerService.lastActive().then(function(beer) {
-                        console.log("Setting path to /#/beers/" + beer._id);
-                        $scope.beer = beer;
-                        $location.path('app/beers/' + beer._id);
-                    });
-                });
-            });
-        };
 
         // Update the master beer list right before we leave this controller
         $scope.$on('$locationChangeStart', function(event, next, current) {

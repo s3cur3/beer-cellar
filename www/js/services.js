@@ -102,21 +102,32 @@ angular.module('BeerCellarApp.services', [])
 
         /**
          * A beer in our collection
+         * @param {Beer=} optionalBeerToClone Clone the name, brewery, etc. from this beer
          * @constructor
          */
-        function Beer() {
+        function Beer(optionalBeerToClone) {
             this.name = "New beer";
             this.brewery = "Unknown";
             this.images = [];
             this.volume = "22 oz.";
             this.quantity = 1;
-            this.style = "IPA";
+            this.style = "Imperial Stout";
             this.purchasePrice = 10;
             this.purchaseDate = DateMath.thisMonth();
             this.drinkAfterYears = 3;
             this.drinkBeforeYears = 6;
             // I'm *really* afraid of collisions!
             this._id = parseInt(Math.random() * 1000).toString() + uuid + Date.now();
+
+            if(optionalBeerToClone) {
+                this.name = optionalBeerToClone.name || this.name;
+                this.brewery = optionalBeerToClone.brewery || this.brewery;
+                this.images = optionalBeerToClone.images || this.images;
+                this.volume = optionalBeerToClone.volume || this.volume;
+                this.style = optionalBeerToClone.style || this.style;
+                this.purchasePrice = optionalBeerToClone.purchasePrice || this.purchasePrice;
+                this.purchaseDate = optionalBeerToClone.purchaseDate || this.purchaseDate;
+            }
         }
 
         /**
@@ -159,8 +170,8 @@ angular.module('BeerCellarApp.services', [])
          * Static method, assigned to class
          * Instance ('this') is not available in static context
          */
-        Beer.build = function() {
-            return new Beer();
+        Beer.build = function(optionalBeerToClone) {
+            return new Beer(optionalBeerToClone);
         };
 
         /**
@@ -249,11 +260,12 @@ angular.module('BeerCellarApp.services', [])
             },
 
             /**
+             * @param {Beer=} optionalBeerToClone Clone the name, brewery, etc. from this beer
              * @return {*} A promise to create a new beer object
              */
-            create: function() {
+            create: function(optionalBeerToClone) {
                 if(DEBUG_BEER_SERVICE) console.log("Created new beer");
-                var b = Beer.build();
+                var b = Beer.build(optionalBeerToClone);
                 return this.save(b);
             },
 
