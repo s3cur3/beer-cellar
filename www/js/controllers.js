@@ -82,11 +82,49 @@ angular.module('BeerCellarApp.controllers', [])
             return chunks;
         };
 
-        $scope.getStylesChunked = function() {
+        $scope.getStylesChunked = function(optionalBeerListToUse) {
             var out = {};
             for(var i = 0; i < $scope.styles.length; i++) {
                 var style = $scope.styles[i];
-                out[style] = $filter('styles')($scope.beers, style);
+                out[style] = $filter('styles')(optionalBeerListToUse || $scope.beers, style);
+            }
+            return out;
+        };
+
+        $scope.getBreweriesChunked = function() {
+            var breweriesSet = {}; // {"someBrewery": true}
+            for(var i = 0; i < $scope.beers.length; i++) {
+                breweriesSet[$scope.beers[i].brewery.trim()] = true;
+            }
+
+            var out = {};
+            for(var brewery in breweriesSet) {
+                if(breweriesSet.hasOwnProperty(brewery) && breweriesSet[brewery]) {
+                    out[brewery] = [];
+                    for(i = 0; i < $scope.beers.length; i++) {
+                        if($scope.beers[i].brewery.trim() === brewery)
+                            out[brewery].push($scope.beers[i])
+                    }
+                }
+            }
+            return out;
+        };
+
+        $scope.getNamesChunked = function() {
+            var namesSet = {}; // {"some beer": true}
+            for(var i = 0; i < $scope.beers.length; i++) {
+                namesSet[$scope.beers[i].name.trim()] = true;
+            }
+
+            var out = {};
+            for(var name in namesSet) {
+                if(namesSet.hasOwnProperty(name) && namesSet[name]) {
+                    out[name] = [];
+                    for(i = 0; i < $scope.beers.length; i++) {
+                        if($scope.beers[i].name.trim() === name)
+                            out[name].push($scope.beers[i])
+                    }
+                }
             }
             return out;
         };
@@ -110,10 +148,18 @@ angular.module('BeerCellarApp.controllers', [])
             return BeerService.all().then(function(allBeers) {
                 console.log("Updated $scope.beers to:", allBeers);
                 $scope.beers = allBeers;
+
                 $scope.beersChunkedByDate = $scope.getDatesChunked();
-                $scope.beersChunkedByStyle = $scope.getStylesChunked();
                 console.log("Chunked by date:", $scope.beersChunkedByDate);
+
+                $scope.beersChunkedByStyle = $scope.getStylesChunked();
                 console.log("Chunked by style:", $scope.beersChunkedByStyle);
+
+                $scope.beersChunkedByName = $scope.getNamesChunked();
+                console.log("Chunked by name:", $scope.beersChunkedByName);
+
+                $scope.beersChunkedByBrewery = $scope.getBreweriesChunked();
+                console.log("Chunked by brewery:", $scope.beersChunkedByBrewery);
 
                 if(updateLastActive) {
                     BeerService.lastActive().then(function(b) {
@@ -136,6 +182,10 @@ angular.module('BeerCellarApp.controllers', [])
                     });
                 });
             });
+        };
+
+        $scope.navigateToBrewery = function(brewery) {
+            $location.path('app/breweries/' + brewery);
         };
 
         $scope.saveModifiedBeer = function() {
@@ -167,26 +217,7 @@ angular.module('BeerCellarApp.controllers', [])
             "750 mL",
             "40 oz."
         ];
-        $scope.styles = [
-            "IPA",
-            "Double IPA",
-            "Belgian IPA",
-            "Stout",
-            "Imperial Stout",
-            "Scotch Ale",
-            "Saison/Farmhouse Ale",
-            "Belgian Blonde Ale",
-            "Sour/Wild Ale",
-            "Dubbel",
-            "Tripel",
-            "Quadruppel",
-            "Belgian (Other)",
-            "Barleywine",
-            "Rye Ale",
-            "Strong Ale",
-            "Old Ale",
-            "Other"
-        ];
+        $scope.styles = Styles;
 
 
         // Check that we're signed in
@@ -339,7 +370,7 @@ angular.module('BeerCellarApp.controllers', [])
         };
     }])
 
-    .controller('BeersCtrl', ['$scope', '$location', 'BeerService', function($scope, $location, BeerService) {
+    .controller('BeersCtrl', ['$scope', function($scope) {
         console.log("In BeersCtrl");
         hideOrShowBackBtn();
 
@@ -347,6 +378,29 @@ angular.module('BeerCellarApp.controllers', [])
         $scope.$on('$locationChangeStart', function(event, next, current) {
             $scope.saveModifiedBeer();
         });
+    }])
+
+    .controller('BreweryCtrl', ['$scope', '$location', '$filter', function($scope, $location, $filter) {
+        console.log("In BreweryCtrl");
+        hideOrShowBackBtn();
+
+        // Update the currently-in-use brewery when we load this one
+        var re = /[^\/]+$/; // matches everything from the last / to the end of the string
+        $scope.brewery = $location.url().match(re)[0];
+        $scope.brewery = $scope.brewery.replace("%20", " ");
+
+        $scope.$watch('beersChunkedByStyle', function() {
+            $scope.brewerysBeersChunkedByStyle = $scope.beersChunkedByStyle;
+            for(var style in $scope.brewerysBeersChunkedByStyle)
+            {
+                if($scope.brewerysBeersChunkedByStyle.hasOwnProperty(style)) {
+                    $scope.brewerysBeersChunkedByStyle[style] = _.filter($scope.brewerysBeersChunkedByStyle[style], function(beer) {
+                        return beer.brewery && beer.brewery === $scope.brewery;
+                    })
+                }
+            }
+        });
+
     }])
 
     .controller('BeerCtrl', ['$scope', '$location', 'BeerService', function($scope, $location, BeerService) {

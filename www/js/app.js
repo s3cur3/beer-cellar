@@ -1,3 +1,24 @@
+var Styles = [
+    "IPA",
+    "Double IPA",
+    "Belgian IPA",
+    "Stout",
+    "Imperial Stout",
+    "Scotch Ale",
+    "Saison/Farmhouse Ale",
+    "Belgian Blonde Ale",
+    "Sour/Wild Ale",
+    "Dubbel",
+    "Tripel",
+    "Quadruppel",
+    "Belgian (Other)",
+    "Barleywine",
+    "Rye Ale",
+    "Strong Ale",
+    "Old Ale",
+    "Other"
+];
+
 
 // selects the desired state chnage behavior depending on whether the user is logged or not
 function determineKinveyBehavior($window, activeUser) {
@@ -91,6 +112,26 @@ beerCellarApp
                     'menuContent': {
                         templateUrl: "templates/styles.html",
                         controller: 'BeersCtrl'
+                    }
+                }
+            })
+
+            .state('app.breweries', {
+                url: "/breweries",
+                views: {
+                    'menuContent': {
+                        templateUrl: "templates/breweries.html",
+                        controller: 'BeersCtrl'
+                    }
+                }
+            })
+
+            .state('app.brewery', {
+                url: "/breweries/:breweryName",
+                views: {
+                    'menuContent': {
+                        templateUrl: "templates/brewery.html",
+                        controller: 'BreweryCtrl'
                     }
                 }
             })
@@ -243,12 +284,20 @@ angular.module('BeerCellarFilters', [])
          * @param style {string} The style type you're interested in
          */
         return function(beerList, style) {
-            var out = [];
-            for(var i = 0; i < beerList.length; i++) {
-                if(beerList[i].style && beerList[i].style.trim() === style)
-                    out.push(beerList[i]);
-            }
-            return out;
+            return _.filter(beerList, function(beer) {
+                return beer.style && (beer.style.trim() === style);
+            });
+        };
+    })
+    .filter('brewery', function() {
+        /**
+         * @param beerList An array of BeerService _Beer objects
+         * @param brewery {string} The style type you're interested in
+         */
+        return function(beerList, brewery) {
+            return _.filter(beerList, function(beer) {
+                return beer.brewery && (beer.brewery.trim() === brewery);
+            });
         };
     })
     .filter('dateString', function() {

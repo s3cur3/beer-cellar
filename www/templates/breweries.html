@@ -1,0 +1,18 @@
+<ion-view title="Beers by Brewery">
+    <ion-nav-buttons side="left">
+        <button menu-toggle="left" class="button button-icon icon ion-navicon menu-button"></button>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+        <button class="button button-icon" ng-click="addBeer()">
+            <i class="icon ion-compose positive"></i><!-- ion-ios7-plus-empty? -->
+        </button>
+    </ion-nav-buttons>
+    <ion-content class="has-header">
+        <ion-list>
+            <ion-item ng-repeat="(brewery, beers) in beersChunkedByBrewery" href="#/app/breweries/{{brewery}}">
+                <h2>{{brewery}}</h2>
+                <div class="badge badge-positive">{{beers.length}}</div>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>
