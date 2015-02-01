@@ -193,7 +193,7 @@ angular.module('BeerCellarApp.services', [])
                 if(DEBUG_BEER_SERVICE) console.log("Finding beer with ID", _id);
 
                 if(_id === null || typeof _id === "undefined") {
-                    assert(typeof _id === "string");
+                    assert(typeof _id === "string", "Beer ID was not a string");
                     return Beer.buildPromise();
                 } else {
                     return $kinvey.DataStore.get('beers', _id);

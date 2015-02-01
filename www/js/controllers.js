@@ -82,6 +82,15 @@ angular.module('BeerCellarApp.controllers', [])
             return chunks;
         };
 
+        $scope.getStylesChunked = function() {
+            var out = {};
+            for(var i = 0; i < $scope.styles.length; i++) {
+                var style = $scope.styles[i];
+                out[style] = $filter('styles')($scope.beers, style);
+            }
+            return out;
+        };
+
         /**
          * Synchronously selects the last active beer
          * @param theBeer {Beer} The beer object to select as the last active one
@@ -102,7 +111,9 @@ angular.module('BeerCellarApp.controllers', [])
                 console.log("Updated $scope.beers to:", allBeers);
                 $scope.beers = allBeers;
                 $scope.beersChunkedByDate = $scope.getDatesChunked();
+                $scope.beersChunkedByStyle = $scope.getStylesChunked();
                 console.log("Chunked by date:", $scope.beersChunkedByDate);
+                console.log("Chunked by style:", $scope.beersChunkedByStyle);
 
                 if(updateLastActive) {
                     BeerService.lastActive().then(function(b) {
@@ -150,11 +161,15 @@ angular.module('BeerCellarApp.controllers', [])
             "Scotch Ale",
             "Saison/Farmhouse Ale",
             "Belgian Blonde Ale",
+            "Sour/Wild Ale",
             "Dubbel",
             "Tripel",
             "Quadruppel",
+            "Belgian (Other)",
             "Barleywine",
-            "Sour/Wild Ale",
+            "Rye Ale",
+            "Strong Ale",
+            "Old Ale",
             "Other"
         ];
 

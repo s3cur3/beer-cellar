@@ -9,14 +9,16 @@
     </ion-nav-buttons>
     <ion-content class="has-header">
         <ion-list>
-            <ion-item ng-repeat="b in beers" href="#/app/beers/{{b.id}}">
-                <p>{{b.brewery}}</p>
-                <h2>{{b.name}}</h2>
-                <div class="badge" ng-show="b.volume != ''">
-                    {{b.volume}}
-                    <span class="badge badge-positive" ng-show="b.quantity > 1">{{b.quantity}}</span>
-                </div>
-            </ion-item>
+            <group label="{{style}}" ng-repeat="(style, beers) in beersChunkedByStyle" ng-show="beers.length > 0">
+                <ion-item ng-repeat="b in beers" href="#/app/beers/{{b._id}}">
+                    <p>{{b.brewery}}</p>
+                    <h2>{{b.name}}</h2>
+                    <div class="badge" ng-show="b.volume != ''">
+                        {{b.volume}}
+                        <span class="badge badge-positive" ng-show="b.quantity > 1">{{b.quantity}}</span>
+                    </div>
+                </ion-item>
+            </group>
         </ion-list>
     </ion-content>
 </ion-view>

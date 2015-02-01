@@ -237,6 +237,20 @@ angular.module('BeerCellarFilters', [])
             return beerList;
         };
     })
+    .filter('styles', function() {
+        /**
+         * @param beerList An array of BeerService _Beer objects
+         * @param style {string} The style type you're interested in
+         */
+        return function(beerList, style) {
+            var out = [];
+            for(var i = 0; i < beerList.length; i++) {
+                if(beerList[i].style && beerList[i].style.trim() === style)
+                    out.push(beerList[i]);
+            }
+            return out;
+        };
+    })
     .filter('dateString', function() {
         /**
          * @param date string A date string formatted as: YYYY-MM
