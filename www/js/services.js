@@ -197,10 +197,15 @@ angular.module('BeerCellarApp.services', [])
         return {
             /**
              * Search for a particular beer in the database
-             * @param _id The ID of the beer to search for
+             * @param _id {string} The ID of the beer to search for
              * @return {*} A promise to return the sought beer
              */
             find: function(_id) {
+                assert(typeof _id === "string");
+
+                // Replace URL-encoded spaces as necessary;
+                _id = _id.replace(/%20/g, " ");
+
                 if(DEBUG_BEER_SERVICE) console.log("Finding beer with ID", _id);
 
                 if(_id === null || typeof _id === "undefined") {

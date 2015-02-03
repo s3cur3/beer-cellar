@@ -33,6 +33,7 @@ DateMath = {
      * @return {string} A string like: "February 2014"
      */
     makeHumanReadable: function(date) {
+        if(!date) { return ""; }
         var monthAndYr = DateMath.getMonthAndYear(date);
         return DateMath.monthNumberToString(monthAndYr.month) + " " + monthAndYr.year;
     },
@@ -65,9 +66,10 @@ DateMath = {
     addYears: function(date, years) {
         assert(typeof date === "string", "Object " + date + " was not a date string.");
         assert(typeof years === "number", "Years value " + years + " was not a number.");
-        var dateJsObj = Date.parse(date);
-        dateJsObj = dateJsObj.add(years).years();
-        return (dateJsObj.getFullYear() + "-" + (dateJsObj.getMonth() + 1));
+        var monthAndYear = DateMath.getMonthAndYear(date);
+        var dateObj = new Date(monthAndYear.year, monthAndYear.month - 1);
+        dateObj.setMonth(dateObj.getMonth() + 12*years);
+        return (dateObj.getFullYear() + "-" + (dateObj.getMonth() + 1));
     },
 
     /**

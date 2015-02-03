@@ -378,6 +378,7 @@ angular.module('BeerCellarApp.controllers', [])
     .controller('BeersCtrl', ['$scope', function($scope) {
         console.log("In BeersCtrl");
         hideOrShowBackBtn();
+        $scope.updateBeers();
 
         // Update the master beer list right before we leave this controller
         $scope.$on('$locationChangeStart', function(event, next, current) {
@@ -410,6 +411,7 @@ angular.module('BeerCellarApp.controllers', [])
     .controller('BeerTypesCtrl', ['$scope', '$location', '$filter', function($scope, $location, $filter) {
         console.log("In BeerTypesCtrl");
         hideOrShowBackBtn();
+        $scope.updateBeers();
     }])
 
     .controller('BeerTypeCtrl', ['$scope', '$location', '$filter', function($scope, $location, $filter) {
@@ -434,13 +436,15 @@ angular.module('BeerCellarApp.controllers', [])
 
         // Update the currently-in-use beer when we load this one
         var re = /[^\/]+$/; // matches everything from the last / to the end of the string
-        var theID = $location.url().match(re);
+        var theID = $location.url().match(re)[0];
 
         console.log("Selecting beer", theID);
         BeerService.find(theID).then(function(beer) {
             console.log("Found it!");
             $scope.selectBeer(beer);
-        });
+        }, function(err) {
+                console.error("Error retrieving selected beer:", err);
+            });
 
         // Update the master beer list right before we leave this controller
         $scope.$on('$locationChangeStart', function(event, next, current) {
