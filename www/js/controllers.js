@@ -408,12 +408,14 @@ angular.module('BeerCellarApp.controllers', [])
         });
     }])
 
+    // Used in names.html
     .controller('BeerTypesCtrl', ['$scope', '$location', '$filter', function($scope, $location, $filter) {
         console.log("In BeerTypesCtrl");
         hideOrShowBackBtn();
         $scope.updateBeers();
     }])
 
+    // Used in name.html
     .controller('BeerTypeCtrl', ['$scope', '$location', '$filter', function($scope, $location, $filter) {
         console.log("In BeerTypeCtrl");
         hideOrShowBackBtn();

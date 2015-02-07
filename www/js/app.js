@@ -304,9 +304,59 @@ angular.module('BeerCellarFilters', [])
          * @param style {string} The style type you're interested in
          */
         return function(beerList, style) {
-            return _.filter(beerList, function(beer) {
+            var allEntriesForStyle = _.filter(beerList, function(beer) {
                 return beer.style && (beer.style.trim() === style);
             });
+            var beersByName = {};
+            for(var i = 0; i < allEntriesForStyle.length; i++) {
+                var beer = allEntriesForStyle[i];
+                if(beersByName[beer.name])
+                    beersByName[beer.name].push(beer);
+                else
+                    beersByName[beer.name] = [beer];
+            }
+
+            var out = [];
+            for(var name in beersByName) {
+                if(beersByName.hasOwnProperty(name)) {
+                    var crntBeer = beersByName[name];
+                    out.push({
+                        name: name,
+                        brewery: crntBeer[0].brewery,
+                        quantity: _.reduce(crntBeer, function(all, crnt) { return all += (crnt.quantity || 1); }, 0),
+                        purchaseDates: _.reduceRight(crntBeer, function(all, crnt) { return all.concat(crnt.purchaseDate); }, []),
+                        drinkAfterYears: _.reduceRight(crntBeer, function(all, crnt) { return all.concat(crnt.drinkAfterYears); }, []),
+                        _ids: _.reduceRight(crntBeer, function(all, crnt) { return all.concat(crnt._id); }, [])
+                    });
+                }
+            }
+            return out;
+        };
+    })
+    .filter('manyDrinkAfterYears', function() {
+        return function(drinkAfterYearsList) {
+            console.log("Got list:",drinkAfterYearsList);
+            if(drinkAfterYearsList) {
+                var max = 0;
+                var min = 10000;
+                for(var i = 0; i < drinkAfterYearsList.length; i++) {
+
+                    var yearVal = drinkAfterYearsList[i];
+                    if(yearVal > max) {
+                        max = yearVal;
+                    }
+                    if(yearVal < min) {
+                        min = yearVal;
+                    }
+                }
+
+                if(max - 0.1 > min + 0.1)
+                    return "" + min + " to " + max + " years";
+                else
+                    return "" + max + " years";
+            } else {
+                return "";
+            }
         };
     })
     .filter('brewery', function() {

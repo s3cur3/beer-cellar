@@ -32,7 +32,7 @@
                 <number-field label="Drink Before" ng-model="beer.drinkBeforeYears" suffix="years"></number-field>
                 <label class="item item-input">
                     <div class="input-label">Calculated Drink Date</div>
-                    <span class="simulate-input item-field">{{beer | drinkDate}}</span>
+                    <span class="simulate-input item-field" ng-if="beer.drinkAfterYears">{{beer | drinkDate}}</span>
                 </label>
 
             </group>

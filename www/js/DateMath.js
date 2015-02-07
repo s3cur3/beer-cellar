@@ -43,9 +43,20 @@ DateMath = {
      * @return {string} A date string formatted as: YYYY-MM
      */
     getDrinkDate: function(beerObj) {
-        assert(beerObj, "Beer object is empty");
-        assert(typeof beerObj.purchaseDate === "string", "Beer object has no purchase date");
-        assert(typeof beerObj.drinkAfterYears === "number", "Beer object has no drink-after years");
+        if(!beerObj) {
+            console.error("Beer object is empty");
+            return DateMath.thisMonth();
+        }
+        if(typeof beerObj.purchaseDate !== "string") {
+            console.log("Beer object has no purchase date");
+            return DateMath.thisMonth();
+        }
+
+        if(typeof beerObj.drinkAfterYears !== "number") {
+            console.log("Beer object has no drink-after years");
+            return DateMath.thisMonth();
+        }
+
         return DateMath.addYears(beerObj.purchaseDate, beerObj.drinkAfterYears);
     },
 
