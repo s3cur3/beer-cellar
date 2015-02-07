@@ -59,6 +59,19 @@ input[type=text].item-field {
     text-align: right;
     height: 1.5em;
 }
+.card-right {
+    float: right;
+    color: #666;
+    font-size: 14px;
+}
+.card-right > p {
+    overflow: visible;
+    text-align: right;
+}
+.card-right .badge {
+    position: static;
+    display: inline;
+}
 .badge > .badge {
     margin-top: 12px;
     right: 0;

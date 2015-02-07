@@ -10,12 +10,12 @@
     <ion-content class="has-header">
         <ion-list>
             <ion-item ng-repeat="b in typesBeers" href="#/app/beers/{{b._id}}">
+                <div class="card-right" ng-if="b.purchaseDate && b.drinkAfterYears">
+                    <p>{{DateMath.addYears(b.purchaseDate, b.drinkAfterYears) | dateString}}</p>
+                    <p><span class="badge badge-positive" ng-show="b.quantity > 1">{{b.quantity}}</span> {{b.volume}}</p>
+                </div>
                 <p>{{b.brewery}}</p>
                 <h2>{{b.name}}</h2>
-                <div class="badge" ng-show="b.volume != ''" ng-if="b.purchaseDate && b.drinkAfterYears">
-                    {{DateMath.addYears(b.purchaseDate, b.drinkAfterYears) | dateString}}
-                    <span class="badge badge-positive" ng-show="b.quantity > 1">{{b.quantity}}</span>
-                </div>
             </ion-item>
         </ion-list>
     </ion-content>

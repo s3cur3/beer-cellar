@@ -12,11 +12,10 @@
             <ion-item ng-repeat="(name, beers) in beersChunkedByName" href="#/app/types/{{ name }}">
                 <group label="{{ name }} &mdash; {{ beers[0].brewery }}">
                     <ion-item ng-repeat="b in beers" href="#/app/beers/{{b._id}}">
+                        <div class="card-right" ng-if="b.purchaseDate && b.drinkAfterYears">
+                            <p><span class="badge badge-positive" ng-show="b.quantity > 1">{{b.quantity}}</span> {{b.volume}}</p>
+                        </div>
                         <h2>{{b | drinkDate}}</h2>
-                        <span class="badge" ng-show="b.volume != ''">
-                            <span ng-show="b.quantity > 1">{{b.quantity}}&times;</span>
-                            {{b.volume}}
-                        </span>
                     </ion-item>
                 </group>
             </ion-item>
