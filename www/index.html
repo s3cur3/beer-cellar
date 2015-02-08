@@ -25,14 +25,17 @@
     <!-- endbower -->
     <!-- endbuild -->
 
-    <!-- cordova script (this will be a 404 during development) -->
-    <script src="cordova.js"></script>
-
     <!-- build:js({.tmp,app}) scripts/scripts.js -->
     <script src="lib/lodash.min.js"></script>
     <script src="lib/jquery.min.js"></script>
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <!-- Cordova must come *after* Ionic/Angular -->
+    <script src="../bower_components/ngCordova/dist/ng-cordova.js"></script><!-- Must come before Cordova -->
+    <script src="cordova.js"></script>
+
     <!--<script src="lib/kinvey-angular-1.1.4.min.js"></script>-->
     <script src="lib/kinvey-angular-1.1.8.js"></script>
     <script src="lib/ng-flow-standalone.js"></script>

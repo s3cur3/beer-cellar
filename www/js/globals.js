@@ -1,5 +1,5 @@
 
-var KINVEY_DEBUG = true;
+var KINVEY_DEBUG = false;
 var appVersion = version.basic;
 
 // a temporary random string; gets reset once we know the username
@@ -67,4 +67,10 @@ function assert( testResult, optionalErrorMsg ) {
         console.error( errorStr );
         exit();
     }
+}
+
+
+
+function runningOnDevice() {
+    return /ios|iphone|ipod|ipad|android/i.test(navigator.userAgent);
 }

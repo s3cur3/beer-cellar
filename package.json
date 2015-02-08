@@ -47,5 +47,9 @@
   },
   "scripts": {
     "test": "grunt test"
-  }
+  },
+  "cordovaPlugins": [
+    "org.apache.cordova.file",
+    "org.apache.cordova.file-transfer"
+  ]
 }
