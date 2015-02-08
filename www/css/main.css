@@ -101,6 +101,13 @@ input[type=text].item-field {
 }
 
 
+/** Menu footer **/
+.bar-footer {
+    padding: 0;
+}
+.bar-footer ion-list {
+    width: 100%;
+}
 
 /** Utility classes **/
 .text-center {
