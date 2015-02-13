@@ -112,7 +112,7 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
      * @type {string}
      * @default
      */
-    Kinvey.SDK_VERSION = '1.1.8';
+    Kinvey.SDK_VERSION = '1.1.9';
 
     // Properties.
     // -----------
@@ -233,12 +233,12 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
     };
 
     /**
- * Returns the active user.
- *
- * @throws {Error} `Kinvey.getActiveUser` can only be called after the promise
-     returned by `Kinvey.init` fulfills or rejects.
- * @returns {?Object} The active user, or `null` if there is no active user.
- */
+     * Returns the active user.
+     *
+     * @throws {Error} `Kinvey.getActiveUser` can only be called after the promise
+         returned by `Kinvey.init` fulfills or rejects.
+     * @returns {?Object} The active user, or `null` if there is no active user.
+     */
     Kinvey.getActiveUser = function() {
       // Validate preconditions.
       if(false === activeUserReady) {
@@ -1056,7 +1056,7 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
       return '[object Array]' === Object.prototype.toString.call(arg);
     };
     var isFunction = function(fn) {
-      if('function' !== typeof / . / ) {
+      if('function' !== typeof /./) {
         return 'function' === typeof fn;
       }
       return '[object Function]' === Object.prototype.toString.call(fn);
@@ -1603,7 +1603,7 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
       }
 
       // Return the device information string.
-      var parts = ['js-angular/1.1.8'];
+      var parts = ['js-angular/1.1.9'];
       if(0 !== libraries.length) { // Add external library information.
         parts.push('(' + libraries.sort().join(', ') + ')');
       }
@@ -3550,7 +3550,7 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
           }, options).then(null, function(error) {
             // If `options.force`, clear the active user on `INVALID_CREDENTIALS`.
             if(options.force && (Kinvey.Error.INVALID_CREDENTIALS === error.name ||
-              Kinvey.Error.EMAIL_VERIFICATION_REQUIRED === error.name)) {
+                Kinvey.Error.EMAIL_VERIFICATION_REQUIRED === error.name)) {
               // Debug.
               if(KINVEY_DEBUG) {
                 log('The user credentials are invalid. Returning success because of the force flag.');
@@ -5050,6 +5050,17 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
     // Relational Data.
     // ----------------
 
+    // Returns a shallow clone of the specified object.
+    var clone = function(object) {
+      var result = {};
+      for(var key in object) {
+        if(object.hasOwnProperty(key)) {
+          result[key] = object[key];
+        }
+      }
+      return result;
+    };
+
     /**
      * @private
      * @namespace KinveyReference
@@ -5072,7 +5083,7 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
         // If a list of documents was passed in, retrieve all relations in parallel.
         if(isArray(document)) {
           var promises = document.map(function(member) {
-            return KinveyReference.get(member, options);
+            return KinveyReference.get(member, clone(options));
           });
           return Kinvey.Defer.all(promises);
         }
@@ -5091,59 +5102,103 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
         delete options.relations;
         delete options.success;
 
-        // Re-order the relations in order of deepness, so the partial responses
-        // propagate properly. Moreover, relations with the same depth can safely
-        // be retrieved in parallel.
-        var properties = [];
+
+
+        // We need to build a relationship mapping object
+        // This is important because we might have to resolve
+        // relationships as objects inside an array of existing
+        // relationships.
+        //
+        // ala: 'month', 'month.days'
+        // with an array of every month as the relationship key
+        var relationMapping = {};
         Object.keys(relations).forEach(function(relation) {
-          var index = relation.split('.').length;
-          properties[index] = (properties[index] || []).concat(relation);
-        });
+          var mapping = relationMapping;
+          var relationSplit = relation.split('.');
+          var relationLength = relationSplit.length;
+          relationSplit.forEach(function(relationStep, index) {
+            if(!mapping.keys) {
+              mapping.keys = {};
+            }
+            if(!mapping.keys[relationStep]) {
+              mapping.keys[relationStep] = {};
+            }
 
-        // Prepare the response.
-        var promise = Kinvey.Defer.resolve(null);
+            mapping = mapping.keys[relationStep];
 
-        // Retrieve all (relational) documents. Starts with the top-level relations.
-        properties.forEach(function(relationalLevel) {
-          promise = promise.then(function() {
-            var promises = relationalLevel.map(function(property) {
-              var reference = nested(document, property); // The reference.
-
-              // Retrieve the relation(s) in parallel.
-              var isArrayRelation = isArray(reference);
-              var promises = (isArrayRelation ? reference : [reference]).map(function(member) {
-                // Do not retrieve if the property is not a reference, or it is
-                // explicitly excluded.
-                if(null == member || 'KinveyRef' !== member._type ||
-                  -1 !== options.exclude.indexOf(property)) {
-                  return Kinvey.Defer.resolve(member);
-                }
-
-                // Forward to the `Kinvey.User` or `Kinvey.DataStore` namespace.
-                var promise;
-                if(USERS === member._collection) {
-                  promise = Kinvey.User.get(member._id, options);
-                }
-                else {
-                  promise = Kinvey.DataStore.get(member._collection, member._id, options);
-                }
-
-                // Return the response.
-                return promise.then(null, function() {
-                  // If the retrieval failed, retain the reference.
-                  return Kinvey.Defer.resolve(member);
-                });
-              });
-
-              // Return the response.
-              return Kinvey.Defer.all(promises).then(function(responses) {
-                // Replace the references in the document with the relations.
-                nested(document, property, isArrayRelation ? responses : responses[0]);
-              });
-            });
-            return Kinvey.Defer.all(promises);
+            if(index === relationLength - 1) {
+              mapping.resolve = true;
+            }
           });
         });
+
+
+        //Recursively process relationships
+        var resolveRelationships = function(entity, relationMapping) {
+          if(relationMapping.keys) {
+            var relationshipPromises = [];
+
+            Object.keys(relationMapping.keys).forEach(function(key) {
+              var relationLevel = relationMapping.keys[key];
+              if(relationLevel.resolve) {
+                // Retrieve the relation(s) in parallel.
+                var isKeyArray = isArray(entity[key]);
+                var promises = (isKeyArray ? entity[key] : [entity[key]]).map(function(member) {
+                  // Do not retrieve if the property is not a reference, or it is
+                  // explicitly excluded.
+                  if(null == member || 'KinveyRef' !== member._type) {
+                    return Kinvey.Defer.resolve(member);
+                  }
+
+                  // Forward to the `Kinvey.User` or `Kinvey.DataStore` namespace.
+                  var promise;
+                  if(USERS === member._collection) {
+                    promise = Kinvey.User.get(member._id, options);
+                  }
+                  else {
+                    promise = Kinvey.DataStore.get(member._collection, member._id, options);
+                  }
+
+                  // Return the response.
+                  return promise.then(function(resolvedMember) {
+                    return resolveRelationships(resolvedMember, relationLevel).then(function() {
+                      return resolvedMember;
+                    }, function() {
+                      return resolvedMember;
+                    });
+                  }, function() {
+                    // If the retrieval failed, retain the reference.
+                    return Kinvey.Defer.resolve(member);
+                  });
+                });
+
+
+                relationshipPromises.push(
+                  Kinvey.Defer.all(promises)
+                  .then(function(relationshipEntities) {
+                    //Once finished we need to update the original entity with our results
+                    if(isKeyArray) {
+                      entity[key] = relationshipEntities;
+                    }
+                    else {
+                      entity[key] = relationshipEntities[0];
+                    }
+                  })
+                );
+              }
+              else {
+                relationshipPromises.push(resolveRelationships(entity[key], relationLevel));
+              }
+            });
+
+            return Kinvey.Defer.all(relationshipPromises);
+          }
+          else {
+            return Kinvey.Defer.resolve();
+          }
+        };
+
+        var promise = resolveRelationships(document, relationMapping);
 
         // All documents are retrieved.
         return promise.then(function() {
@@ -5169,6 +5224,7 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
           options.success = success;
           return Kinvey.Defer.reject(reason);
         });
+
       },
 
       /**
@@ -5190,7 +5246,7 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
         // If a list of documents was passed in, retrieve all relations in parallel.
         if(isArray(document)) {
           var promises = document.map(function(member) {
-            return KinveyReference.save(collection, member, options);
+            return KinveyReference.save(collection, member, clone(options));
           });
           return Kinvey.Defer.all(promises);
         }
@@ -8599,135 +8655,134 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
     // Define the Angular.js Kinvey module.
     var module = angular.module('kinvey', []);
 
-    module.factory('$kinvey', ['$http', '$q',
-      function($http, $q) {
+    module.factory('$kinvey', ['$http', '$q', function($http, $q) {
 
-        // Deferreds.
-        // ----------
+      // Deferreds.
+      // ----------
 
-        // Use Angular’s `$q`.
-        Kinvey.Defer.use({
-          deferred: $q.defer
-        });
+      // Use Angular’s `$q`.
+      Kinvey.Defer.use({
+        deferred: $q.defer
+      });
 
-        // `Kinvey.Persistence.Net` adapter for [$http](http://docs.angularjs.org/api/ng.$http).
-        var AngularHTTP = {
-          /**
-           * @augments {Kinvey.Persistence.Net.request}
-           */
-          base64: function(value) {
-            return root.btoa(value);
-          },
+      // `Kinvey.Persistence.Net` adapter for [$http](http://docs.angularjs.org/api/ng.$http).
+      var AngularHTTP = {
+        /**
+         * @augments {Kinvey.Persistence.Net.request}
+         */
+        base64: function(value) {
+          return root.btoa(value);
+        },
 
-          /**
-           * Flag whether the device supports Blob.
-           *
-           * @property {boolean}
-           */
-          supportsBlob: (function() {
-            // The latest version of the File API uses `new Blob` to create a Blob
-            // object. Older browsers, however, do not support this and fall back to
-            // using ArrayBuffer.
-            try {
-              return new root.Blob() && true;
+        /**
+         * Flag whether the device supports Blob.
+         *
+         * @property {boolean}
+         */
+        supportsBlob: (function() {
+          // The latest version of the File API uses `new Blob` to create a Blob
+          // object. Older browsers, however, do not support this and fall back to
+          // using ArrayBuffer.
+          try {
+            return new root.Blob() && true;
+          }
+          catch(e) {
+            return false;
+          }
+        }()),
+
+        /**
+         * @augments {Kinvey.Persistence.Net.encode}
+         */
+        encode: root.encodeURIComponent,
+
+        /**
+         * @augments {Kinvey.Persistence.Net.request}
+         */
+        request: function(method, url, body, headers, options) {
+          // Cast arguments.
+          body = body || {};
+          headers = headers || {};
+          options = options || {};
+
+          // Append header for compatibility with Android 2.2, 2.3.3, and 3.2.
+          // http://www.kinvey.com/blog/item/179-how-to-build-a-service-that-supports-every-android-browser
+          if(0 === url.indexOf(Kinvey.API_ENDPOINT) && 'GET' === method) {
+            var location = root.location;
+            if(null != location && null != location.protocol) {
+              headers['X-Kinvey-Origin'] = location.protocol + '//' + location.host;
             }
-            catch(e) {
-              return false;
-            }
-          }()),
+          }
 
-          /**
-           * @augments {Kinvey.Persistence.Net.encode}
-           */
-          encode: root.encodeURIComponent,
+          // Debug.
+          if(KINVEY_DEBUG) {
+            log('Initiating a network request.', method, url, body, headers, options);
+          }
 
-          /**
-           * @augments {Kinvey.Persistence.Net.request}
-           */
-          request: function(method, url, body, headers, options) {
-            // Cast arguments.
-            body = body || {};
-            headers = headers || {};
-            options = options || {};
-
-            // Append header for compatibility with Android 2.2, 2.3.3, and 3.2.
-            // http://www.kinvey.com/blog/item/179-how-to-build-a-service-that-supports-every-android-browser
-            if(0 === url.indexOf(Kinvey.API_ENDPOINT) && 'GET' === method) {
-              var location = root.location;
-              if(null != location && null != location.protocol) {
-                headers['X-Kinvey-Origin'] = location.protocol + '//' + location.host;
-              }
-            }
-
-            // Debug.
-            if(KINVEY_DEBUG) {
-              log('Initiating a network request.', method, url, body, headers, options);
-            }
-
-            // Initiate the request.
-            if(isObject(body) && !(
+          // Initiate the request.
+          if(isObject(body) && !(
               (null != root.ArrayBuffer && body instanceof root.ArrayBuffer) ||
               (null != root.Blob && body instanceof root.Blob)
             )) {
-              body = null != angular.toJson ? angular.toJson(body) : JSON.stringify(body);
+            body = null != angular.toJson ? angular.toJson(body) : JSON.stringify(body);
+          }
+
+          return $http({
+            data: body,
+            headers: headers,
+            method: method,
+            timeout: options.timeout,
+            url: url
+          }).then(function(response) {
+            // Debug.
+            if(KINVEY_DEBUG) {
+              log('The network request completed.', response);
             }
 
-            return $http({
-              data: body,
-              headers: headers,
-              method: method,
-              timeout: options.timeout,
-              url: url
-            }).then(function(response) {
-              // Debug.
-              if(KINVEY_DEBUG) {
-                log('The network request completed.', response);
+            // If `options.file`, convert the response to `Blob` object.
+            response = response.data;
+            if(options.file && null != response && null != root.ArrayBuffer) {
+              // jQuery does not provide a nice way to set the responseType to blob,
+              // so convert the response to binary manually.
+              // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Sending_and_Receiving_Binary_Data
+              var buffer = new root.ArrayBuffer(response.length);
+              var bufView = new root.Uint8Array(buffer);
+              for(var i = 0, length = response.length; i < length; i += 1) {
+                bufView[i] = response.charCodeAt(i);
               }
 
-              // If `options.file`, convert the response to `Blob` object.
-              response = response.data;
-              if(options.file && null != response && null != root.ArrayBuffer) {
-                // jQuery does not provide a nice way to set the responseType to blob,
-                // so convert the response to binary manually.
-                // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Sending_and_Receiving_Binary_Data
-                var buffer = new root.ArrayBuffer(response.length);
-                var bufView = new root.Uint8Array(buffer);
-                for(var i = 0, length = response.length; i < length; i += 1) {
-                  bufView[i] = response.charCodeAt(i);
-                }
-
-                // If possible, convert the buffer to an actual `Blob` object.
-                if(AngularHTTP.supportsBlob) {
-                  buffer = new root.Blob([bufView], {
-                    type: options.file
-                  });
-                }
-                response = buffer;
+              // If possible, convert the buffer to an actual `Blob` object.
+              if(AngularHTTP.supportsBlob) {
+                buffer = new root.Blob([bufView], {
+                  type: options.file
+                });
               }
+              response = buffer;
+            }
 
-              // Return the response.
-              return response || null;
-            }, function(response) {
-              // Debug.
-              if(KINVEY_DEBUG) {
-                log('The network request failed.', response);
-              }
+            // Return the response.
+            return response || null;
+          }, function(response) {
+            // Debug.
+            if(KINVEY_DEBUG) {
+              log('The network request failed.', response);
+            }
 
-              // Return the response.
-              return $q.reject(response.data || null);
-            });
-          }
-        };
+            // Return the response.
+            return $q.reject(response.data || null);
+          });
+        }
+      };
 
-        // Use Angular adapter.
-        Kinvey.Persistence.Net.use(AngularHTTP);
+      // Use Angular adapter.
+      Kinvey.Persistence.Net.use(AngularHTTP);
 
-        return Kinvey;
-      }
-    ]);
+      return Kinvey;
+    }]);
 
     // `Storage` adapter for
     // [localStorage](http://www.w3.org/TR/webstorage/#the-localstorage-attribute).
+    var localStorageAdapter = {};
     if('undefined' !== typeof localStorage) {
       // The storage methods are executed in the background. Therefore, implement a
       // queue to force the background processes to execute serially.
@@ -8737,7 +8792,7 @@ d.traverse)m.traversable[j]=!0};"undefined"!=typeof module&&"undefined"!=typeof 
        * @private
        * @namespace
        */
-      var localStorageAdapter = {
+      localStorageAdapter = {
         /**
          * @augments {Storage._destroy}
          */

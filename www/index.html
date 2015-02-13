@@ -25,16 +25,17 @@
     <!-- endbower -->
     <!-- endbuild -->
 
-    <!-- cordova script (this will be a 404 during development) -->
-    <script src="cordova.js"></script>
-
     <!-- build:js({.tmp,app}) scripts/scripts.js -->
     <script src="lib/lodash.min.js"></script>
     <script src="lib/jquery.min.js"></script>
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
-    <!--<script src="lib/kinvey-angular-1.1.4.min.js"></script>-->
-    <script src="lib/kinvey-angular-1.1.8.js"></script>
+
+    <!-- Cordova must be loaded after Ionic (since ngCordova depends on AngularJS) -->
+    <script src="bower_components/ngCordova/dist/ng-cordova.js"></script>
+    <script src="cordova.js"></script>
+
+    <script src="lib/kinvey-angular-1.1.9.js"></script>
     <script src="lib/ng-flow-standalone.js"></script>
     <script src="lib/enums/enums.js"></script>
     <script src="js/enums.js"></script>
@@ -46,7 +47,7 @@
     <!-- endbuild -->
 </head>
 
-<body ng-app="BeerCellarApp">
+<body ng-app="BeerCellarApp" ng-controller="AppCtrl">
 <ion-nav-view class="slide-left-right-ios7"></ion-nav-view>
 
 <script id="delete.html" type="text/ng-template">
