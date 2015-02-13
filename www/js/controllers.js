@@ -28,11 +28,6 @@ function hideOrShowBackBtn() {
         hideShowTimeouts.push(window.setTimeout(hideOrShowBackBtnNonRecursive, millisecondsToRunAt[j]));
 }
 
-if(!runningOnDevice()) {
-    // Need to stub out Cordova plugins
-    angular.module('ngCordova', []).factory('$cordovaFile', function() { return {}; });
-}
-
 angular.module('BeerCellarApp.controllers', [])
 
     .controller('AppCtrl', ['$scope', '$kinvey', '$state', '$location', '$ionicModal', '$filter', 'BeerService', 'UserService', 'CameraFactory', function($scope, $kinvey, $state, $location, $ionicModal, $filter, BeerService, UserService, CameraFactory) {
@@ -326,7 +321,9 @@ angular.module('BeerCellarApp.controllers', [])
                     //Kinvey logout finished with error
                     alert("Error logout: " + JSON.stringify(error));
                 });
-        }
+        };
+
+        $scope.runningOnDevice = runningOnDevice;
     }])
 
     .controller('SignInCtrl', ['$scope', '$kinvey', '$state', 'UserService', function ($scope, $kinvey, $state, UserService) {
@@ -384,7 +381,7 @@ angular.module('BeerCellarApp.controllers', [])
 
     }])
 
-    .controller('ExportCtrl', ['$scope', '$cordovaFile', function($scope, $cordovaFile) {
+    .controller('ExportCtrl', ['$scope', '$kinvey', '$state', 'UserService', function ($scope, $kinvey, $state, UserService) {
         $scope.exportCSV = function() {
             var tsv = "Beer Name\tBrewery\tVolume\tQuantity\tStyle\tPurchase Price\tPurchase Date\tDrink After (Years)\tDrink Before (Years)\tApp ID\n";
             for(var i = 0; i < $scope.beers.length; i++) {
@@ -397,93 +394,14 @@ angular.module('BeerCellarApp.controllers', [])
                 tsv += fields.join("\t") + "\n";
             }
 
-            if(runningOnDevice()) {
-                // TODO: Write the actual file
-                console.error("TODO: Write the actual file");
-            } else {
-                // Create the file from a data URI
-                console.log("Creating download link");
-                var pom = document.createElement('a');
-                pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(tsv));
-                pom.setAttribute('download', "beer-cellar.tsv");
-                pom.click();
-                $scope.success = true;
-            }
+            // Create the file from a data URI
+            console.log("Creating download link");
+            var pom = document.createElement('a');
+            pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(tsv));
+            pom.setAttribute('download', "beer-cellar.tsv");
+            pom.click();
+            $scope.success = true;
         };
-
-        /*
-         List dir test and remove all dirs and files in test to start over again the test
-         */
-        function ClearDirectory() {
-            console.log('ClearDirectory');
-            $cordovaFile.listDir(fileDir + 'test').then( function(entries) {
-                console.log('listDir: ', entries);
-            }, function(err) {
-                console.error('listDir error: ', err);
-            });
-
-            $cordovaFile.removeRecursively(fileDir + 'test')
-                .then( function() {
-                    console.log(trinlDir + ' recursively removed');
-                },
-                function(err) {
-                    console.log(fileDir + ' error: ', err);
-                });
-        }
-
-        /*
-         Here some examples with proper filepath
-         */
-        function testFS() {
-            // Download file from 'http://www.yourdomain.com/test.jpg' to test/one/test.jpg on device Filesystem
-            var hostPath = 'http://www.yourdomain.com/test.jpg';
-            var clientPath = fileTransferDir + 'test/one/test.jpg';
-            var fileTransferOptions = {};
-
-            $cordovaFile.downloadFile(hostPath, clientPath, true, fileTransferOptions).then (function() {
-            });
-            // Create dir test
-            $cordovaFile.createDir(fileDir + 'test/').then( function(dirEntry) {
-            });
-            // Create dir aganin in dir test
-            $cordovaFile.createDir(fileDir + 'test/one/').then( function(dirEntry) {
-            });
-            // Create empty file test.txt in test/again/
-            $cordovaFile.createFile(fileDir + 'test/one/test.txt', true).then( function(fileEntry) {
-            });
-            // List of files in test/again
-            $cordovaFile.listDir(fileDir + 'test/one/').then( function(entries) {
-                console.log('list dir: ', entries);
-            });
-            // Write some text into file
-            $cordovaFile.writeFile(fileDir + 'test/one/test.txt', 'Some text te test filewrite', '').then( function(result) {
-            });
-            // Read text written in file
-            $cordovaFile.readAsText(fileDir + 'test/one/test.txt').then( function(result) {
-                console.log('readAsText: ', result);
-            });
-        }
-
-        function testQ() {
-            var hostPath = 'http://www.yourdomain.com/test.jpg';
-            var clientPath = fileTransferDir + 'test/one/test.jpg';
-            var fileTransferOptions = {};
-            $q.all([
-                $cordovaFile.downloadFile(hostPath, clientPath, true, fileTransferOptions),
-                $cordovaFile.createDir(fileDir + 'test/'),
-                $cordovaFile.createDir(fileDir + 'test/two/'),
-                $cordovaFile.createFile(fileDir + 'test/one/test.txt', true),
-                $cordovaFile.listDir(fileDir + 'test/one/'),
-                $cordovaFile.writeFile(fileDir + 'test/one/test.txt', 'Some text te test filewrite', ''),
-                $cordovaFile.readAsText(fileDir + 'test/one/test.txt')
-            ]).then( function(result) {
-                console.log('testQ result: ', result);
-            });
-        }
-
-
-
-
     }])
 
     .controller('BeersCtrl', ['$scope', function($scope) {

@@ -2,14 +2,16 @@
     <div class="bar bar-header bar-stable">
         <h1 class="title">Create Account</h1>
     </div>
-    <ion-content class="has-header content-pad" ng-controller="ExportCtrl">
-        <h2>Data Export</h2>
-        <div class="alert alert-success" ng-show="success">
-            <p><strong>File created!</strong></p>
-            <p>You can open the file you downloaded in a spreadsheet program like Microsoft Excel or Google Docs.</p>
+    <ion-content class="has-header content-pad">
+        <div ng-controller="ExportCtrl" ng-show="!runningOnDevice()">
+            <h2>Data Export</h2>
+            <div class="alert alert-success" ng-show="success">
+                <p><strong>File created!</strong></p>
+                <p>You can open the file you downloaded in a spreadsheet program like Microsoft Excel or Google Docs.</p>
+            </div>
+            <a class="item button button-positive" ng-click="exportCSV()">
+                Export all app data to a file
+            </a>
         </div>
-        <a class="item button button-positive" ng-click="exportCSV()">
-            Export all app data to a file
-        </a>
     </ion-content>
 </ion-view>
