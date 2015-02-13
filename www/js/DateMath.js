@@ -1,15 +1,11 @@
 
 DateMath = {
     /**
-     * @param date {string} A date string formatted as: YYYY-MM
+     * @param date {Date} A date object
      * @return {{year: Number, month: Number, quarter: number}}
      */
     getMonthAndYear: function(date) {
-        assert(typeof date === "string");
-
-        var arrayVersion = date.split("-");
-
-        var m = parseInt(arrayVersion[1]);
+        var m = date.getMonth() + 1;
         var q = 0;
         if(m <= 3) {
             q = 1;
@@ -22,14 +18,23 @@ DateMath = {
         }
 
         return {
-            "year": parseInt(arrayVersion[0]),
+            "year": date.getFullYear(),
             "month": m,
             "quarter": q
         };
     },
 
+    dateObjFromString: function(dateString) {
+        assert(typeof dateString === "string", "dateObjFromString() argument was not a string");
+        var arrayVersion = dateString.split("-");
+
+        var m = parseInt(arrayVersion[1]);
+        var y = parseInt(arrayVersion[0]);
+        return new Date(y, m - 1);
+    },
+
     /**
-     * @param date {string} A date string formatted as: YYYY-MM
+     * @param date {Date} A date object
      * @return {string} A string like: "February 2014"
      */
     makeHumanReadable: function(date) {
@@ -47,8 +52,8 @@ DateMath = {
             console.error("Beer object is empty");
             return DateMath.thisMonth();
         }
-        if(typeof beerObj.purchaseDate !== "string") {
-            console.log("Beer object has no purchase date");
+        if(typeof beerObj.purchaseDate !== "object" || !beerObj.purchaseDate) {
+            console.log("Beer object with name " + beerObj.name + " has no purchase date", beerObj);
             return DateMath.thisMonth();
         }
 
@@ -61,37 +66,34 @@ DateMath = {
     },
 
     /**
-     * @param dateString {string} A date string formatted as: YYYY-MM
+     * @param date {Date} A date string formatted as: YYYY-MM
      * @return {{year: Number, month: Number, quarter: number}}
      */
-    getQuarter: function(dateString) {
-        assert(typeof dateString === "string", "Object " + dateString + " was not a date string.");
-        return DateMath.getMonthAndYear(dateString).quarter;
+    getQuarter: function(date) {
+        assert(date, "Object " + date + " was not a date object.");
+        return DateMath.getMonthAndYear(date).quarter;
     },
 
     /**
-     * @param date {string} A date string formatted as: YYYY-MM
+     * @param date {Date} A date string formatted as: YYYY-MM
      * @param years {Number} the number of years to be added
-     * @return {string} A date string formatted as: YYYY-MM
+     * @return {Date} A date object that many years in the future
      */
     addYears: function(date, years) {
-        assert(typeof date === "string", "Object " + date + " was not a date string.");
+        assert(!!date, "Object " + date + " was not a date string.");
         assert(typeof years === "number", "Years value " + years + " was not a number.");
         var monthAndYear = DateMath.getMonthAndYear(date);
         var dateObj = new Date(monthAndYear.year, monthAndYear.month - 1);
         dateObj.setMonth(dateObj.getMonth() + 12*years);
-        return (dateObj.getFullYear() + "-" + (dateObj.getMonth() + 1));
+        return dateObj;
     },
 
     /**
-     * @param date1 {string} A date string formatted as: YYYY-MM
-     * @param date2 {string} A date string formatted as: YYYY-MM
+     * @param date1 {Date}
+     * @param date2 {Date}
      * @return {Number} Negative if date1 comes before date2; positive if date2 comes before date1; zero if they are equal.
      */
     compare: function(date1, date2) {
-        assert(typeof date1 === "string", "Object " + date1 + "was not a date string.");
-        assert(typeof date2 === "string", "Object " + date2 + "was not a date string.");
-
         var monthAndYears1 = DateMath.getMonthAndYear(date1);
         var monthAndYears2 = DateMath.getMonthAndYear(date2);
 
@@ -116,9 +118,6 @@ DateMath = {
      * @return {Number} Negative if date1's year comes before date2's year; positive if date2's year comes before date1's year; zero if they are in the same calendar year.
      */
     compareYear: function(date1, date2) {
-        assert(typeof date1 === "string", "Object " + date1 + "was not a date string.");
-        assert(typeof date2 === "string", "Object " + date2 + "was not a date string.");
-
         var monthAndYears1 = DateMath.getMonthAndYear(date1);
         var monthAndYears2 = DateMath.getMonthAndYear(date2);
 
@@ -161,7 +160,8 @@ DateMath = {
             yearsFromNow = 0;
 
         var d = new Date();
-        return (d.getFullYear() + parseInt(yearsFromNow)) + "-" + (d.getMonth() + 1);
+        d.setMonth(d.getMonth() + 12*yearsFromNow);
+        return d;
     },
 
     /**

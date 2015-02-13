@@ -113,7 +113,7 @@ angular.module('BeerCellarApp.services', [])
             this.quantity = 1;
             this.style = "Imperial Stout";
             this.purchasePrice = 10;
-            this.purchaseDate = DateMath.thisMonth();
+            this.purchaseDate = new Date();
             this.drinkAfterYears = 3;
             this.drinkBeforeYears = 6;
             // I'm *really* afraid of collisions!
@@ -201,7 +201,7 @@ angular.module('BeerCellarApp.services', [])
              * @return {*} A promise to return the sought beer
              */
             find: function(_id) {
-                assert(typeof _id === "string");
+                assert(typeof _id === "string", "Sought ID is not a string");
 
                 // Replace URL-encoded spaces as necessary;
                 _id = _id.replace(/%20/g, " ");
@@ -212,7 +212,13 @@ angular.module('BeerCellarApp.services', [])
                     assert(typeof _id === "string", "Beer ID was not a string");
                     return Beer.buildPromise();
                 } else {
-                    return $kinvey.DataStore.get('beers', _id);
+                    return $kinvey.DataStore.get('beers', _id)
+                        .then(function(beer) {
+                            if(typeof beer.purchaseDate === "string") {
+                                beer.purchaseDate = DateMath.dateObjFromString(beer.purchaseDate);
+                            }
+                            return beer;
+                        });
                 }
             },
 
@@ -250,7 +256,15 @@ angular.module('BeerCellarApp.services', [])
              */
             all: function() {
                 if(DEBUG_BEER_SERVICE) console.log("Getting all beers");
-                return $kinvey.DataStore.find('beers');
+                return $kinvey.DataStore.find('beers')
+                    .then(function(beers) {
+                        for(var i = 0; i < beers.length; i++) {
+                            if(typeof beers[i].purchaseDate === "string") {
+                                beers[i].purchaseDate = DateMath.dateObjFromString(beers[i].purchaseDate);
+                            }
+                        }
+                        return beers;
+                    });
             },
 
             clean: function() {

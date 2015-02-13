@@ -47,6 +47,8 @@
                         Not ready to drink
                     </ion-item>
                 </group>
+
+                <p ng-show="beers.length > 0" class="content-pad">Beers in the cellar: <strong>{{beers.length}}</strong></p>
             </ion-list>
         </ion-content>
         <ion-footer-bar align-title="left">

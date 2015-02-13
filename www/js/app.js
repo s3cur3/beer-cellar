@@ -297,6 +297,12 @@ angular.module('BeerCellarFilters', [])
          */
         return function(beerList) {
             beerList.sort(function(beer1, beer2) {
+                if(typeof beer1.purchaseDate === "string") {
+                    console.log("Got a string date (that's wierd...). Obj was:", beer1);
+                }
+                if(typeof beer2.purchaseDate === "string") {
+                    console.log("Got a string date (that's wierd...). Obj was:", beer2);
+                }
                 if(beer1.purchaseDate && beer2.purchaseDate && beer1.drinkAfterYears && beer2.drinkAfterYears) {
                     var date1 = DateMath.getDrinkDate(beer1);
                     var date2 = DateMath.getDrinkDate(beer2);
@@ -386,7 +392,7 @@ angular.module('BeerCellarFilters', [])
          * @param date string A date string formatted as: YYYY-MM
          */
         return function(date) {
-            assert(typeof date === "string", "Object " + date.toString() + "was not a date string.");
+            assert(typeof date !== "string" && date, "dateString filter: Object " + date.toString() + " was not a date object.");
 
             var monthAndYear = DateMath.getMonthAndYear(date);
             var monthString = DateMath.monthNumberToString(monthAndYear.month);
