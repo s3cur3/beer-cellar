@@ -30,7 +30,7 @@ function hideOrShowBackBtn() {
 
 if(!runningOnDevice()) {
     // Need to stub out Cordova plugins
-    angular.module('ngCordova', []).controller('$cordovaFile');
+    angular.module('ngCordova', []).factory('$cordovaFile', function() { return {}; });
 }
 
 angular.module('BeerCellarApp.controllers', [])
@@ -380,7 +380,11 @@ angular.module('BeerCellarApp.controllers', [])
         };
     }])
 
-    .controller('SettingsCtrl', ['$scope', '$cordovaFile', function ($scope, $cordovaFile) {
+    .controller('SettingsCtrl', ['$scope', function($scope) {
+
+    }])
+
+    .controller('ExportCtrl', ['$scope', '$cordovaFile', function($scope, $cordovaFile) {
         $scope.exportCSV = function() {
             var tsv = "Beer Name\tBrewery\tVolume\tQuantity\tStyle\tPurchase Price\tPurchase Date\tDrink After (Years)\tDrink Before (Years)\tApp ID\n";
             for(var i = 0; i < $scope.beers.length; i++) {
@@ -392,10 +396,18 @@ angular.module('BeerCellarApp.controllers', [])
                 }
                 tsv += fields.join("\t") + "\n";
             }
-            console.log(tsv);
 
             if(runningOnDevice()) {
                 // TODO: Write the actual file
+                console.error("TODO: Write the actual file");
+            } else {
+                // Create the file from a data URI
+                console.log("Creating download link");
+                var pom = document.createElement('a');
+                pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(tsv));
+                pom.setAttribute('download', "beer-cellar.tsv");
+                pom.click();
+                $scope.success = true;
             }
         };
 
