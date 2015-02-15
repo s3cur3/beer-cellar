@@ -109,11 +109,17 @@ beerCellarApp
                 console.log('Android FILEDIR: ' + fileDir);
             }
             if(ionic.Platform.isIOS()) {
-                console.log('cordova.file.documentsDirectory: ' + cordova.file.documentsDirectory);
-                fileTransferDir = cordova.file.documentsDirectory;
-                fileDir = '';
-                console.log('IOS FILETRANSFERDIR: ' + fileTransferDir);
-                console.log('IOS FILEDIR: ' + fileDir);
+                if(cordova && cordova.file && cordova.file.documentsDirectory) {
+                    console.log('cordova.file.documentsDirectory: ' + cordova.file.documentsDirectory);
+                    fileTransferDir = cordova.file.documentsDirectory;
+                    fileDir = '';
+                    console.log('IOS FILETRANSFERDIR: ' + fileTransferDir);
+                    console.log('IOS FILEDIR: ' + fileDir);
+                } else {
+                    if(!cordova) console.error("Cordova not defined");
+                    else if(!cordova.file) console.error("cordova.file not defined");
+                    else if(!cordova.file.documentsDirectory) console.error("cordova.file.documentsDirectory not defined");
+                }
             }
 
         });
