@@ -292,12 +292,13 @@ beerCellarApp
             transclude: true,
             scope: {
                 label: '@',
+                autocapitalize: '@',
                 model: '=ngModel'
             },
             template:
                 '<label class="input-text item">' +
                     '{{label}}' +
-                    '<input type="text" ng-model="model" class="item-field">' +
+                    '<input type="text" ng-model="model" class="item-field" autocapitalize="{{autocapitalize}}">' +
                 '</input-text>'
         };
     })

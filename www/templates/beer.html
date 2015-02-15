@@ -7,8 +7,8 @@
         <h1 class="content-pad">Beer Info</h1>
         <div class="list">
             <group label="Basic Info">
-                <text-field label="Brewery" ng-model="beer.brewery"></text-field>
-                <text-field label="Name" ng-model="beer.name"></text-field>
+                <text-field label="Brewery" ng-model="beer.brewery" autocapitalize="words"></text-field>
+                <text-field label="Name" ng-model="beer.name" autocapitalize="words"></text-field>
                 <number-field label="Purchased Price" ng-model="beer.purchasePrice" prefix="$"></number-field>
                 <label class="item item-input item-select">
                     <div class="input-label">Style</div>
