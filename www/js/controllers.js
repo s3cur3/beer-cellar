@@ -28,6 +28,12 @@ function hideOrShowBackBtn() {
         hideShowTimeouts.push(window.setTimeout(hideOrShowBackBtnNonRecursive, millisecondsToRunAt[j]));
 }
 
+if(!runningOnDevice()) {
+    // Need to stub out Cordova plugins
+    angular.module('ngCordova', []).factory('$cordovaFile', function() { return {}; });
+}
+
+
 angular.module('BeerCellarApp.controllers', [])
 
     .controller('AppCtrl', ['$scope', '$kinvey', '$state', '$location', '$ionicModal', '$filter', 'BeerService', 'UserService', 'CameraFactory', function($scope, $kinvey, $state, $location, $ionicModal, $filter, BeerService, UserService, CameraFactory) {
