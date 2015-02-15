@@ -393,7 +393,6 @@ angular.module('BeerCellarFilters', [])
     })
     .filter('manyDrinkAfterYears', function() {
         return function(drinkAfterYearsList) {
-            console.log("Got list:",drinkAfterYearsList);
             if(drinkAfterYearsList) {
                 var max = 0;
                 var min = 10000;
