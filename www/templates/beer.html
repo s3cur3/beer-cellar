@@ -7,7 +7,15 @@
         <h1 class="content-pad">Beer Info</h1>
         <div class="list">
             <group label="Basic Info">
-                <text-field label="Brewery" ng-model="beer.brewery" autocapitalize="words"></text-field>
+                <!-- Brewery input (with autocompletion) -->
+                <label class="input-text item">
+                    Brewery
+                    <input type="text" ng-model="beer.brewery" class="item-field" autocapitalize="words" ng-focus="suggestBreweries = true;" ng-blur="suggestBreweries = false;">
+                </label>
+                <ul class="autocomplete" ng-show="suggestBreweries && knownBreweries.indexOf(beer.brewery) === -1">
+                    <li class="item" ng-repeat="brewery in knownBreweries | filter:beer.brewery" ng-click="beer.brewery = brewery">{{brewery}}</li>
+                </ul>
+                
                 <text-field label="Name" ng-model="beer.name" autocapitalize="words"></text-field>
                 <number-field label="Purchased Price" ng-model="beer.purchasePrice" prefix="$"></number-field>
                 <label class="item item-input item-select">

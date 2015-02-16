@@ -88,6 +88,12 @@ input[type=text].item-field {
 .spacer.invisible {
     border: none;
 }
+.autocomplete {
+    margin-left: 3em;
+}
+.autocomplete li:before {
+    content: '\21B3\0020';
+}
 
 /** Buttons **/
 .button.dangerous {

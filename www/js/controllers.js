@@ -167,6 +167,8 @@ angular.module('BeerCellarApp.controllers', [])
                 $scope.beersChunkedByBrewery = $scope.getBreweriesChunked();
                 console.log("Chunked by brewery:", $scope.beersChunkedByBrewery);
 
+                $scope.knownBreweries = Object.keys($scope.beersChunkedByBrewery).sort();
+
                 if(updateLastActive) {
                     BeerService.lastActive().then(function(b) {
                         $scope.beer = b;
