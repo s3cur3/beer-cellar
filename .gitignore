@@ -6,12 +6,6 @@
 .sass-cache/*
 platforms/
 
-**/bower_components/
-**/bower_components/*
-**/bower_components/*/*
-bower_components
-bower_components/*
-bower_components/*/*
 
 
 hooks/after_platform_add/010_install_plugins.js
