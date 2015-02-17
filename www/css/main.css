@@ -90,9 +90,14 @@ input[type=text].item-field {
 }
 .autocomplete {
     margin-left: 3em;
+    color: #666;
+}
+.autocomplete .item {
+    color: #666;
 }
 .autocomplete li:before {
     content: '\21B3\0020';
+    color: #333;
 }
 
 /** Buttons **/

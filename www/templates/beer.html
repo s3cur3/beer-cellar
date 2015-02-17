@@ -15,8 +15,16 @@
                 <ul class="autocomplete" ng-show="suggestBreweries && knownBreweries.indexOf(beer.brewery) === -1">
                     <li class="item" ng-repeat="brewery in knownBreweries | filter:beer.brewery" ng-click="beer.brewery = brewery">{{brewery}}</li>
                 </ul>
-                
-                <text-field label="Name" ng-model="beer.name" autocapitalize="words"></text-field>
+
+                <!-- Beer name input (with autocompletion) -->
+                <label class="input-text item">
+                    Name
+                    <input type="text" ng-model="beer.name" class="item-field" autocapitalize="words" ng-focus="suggestBeerNames = true;" ng-blur="suggestBeerNames = false;">
+                </label>
+                <ul class="autocomplete" ng-show="suggestBeerNames && knownBeerNames.indexOf(beer.name) === -1">
+                    <li class="item" ng-repeat="beerName in knownBeerNames | filter:beer.name" ng-click="beer.name = beerName">{{beerName}}</li>
+                </ul>
+
                 <number-field label="Purchased Price" ng-model="beer.purchasePrice" prefix="$"></number-field>
                 <label class="item item-input item-select">
                     <div class="input-label">Style</div>
