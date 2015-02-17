@@ -203,7 +203,7 @@ angular.module('BeerCellarApp.controllers', [])
         };
 
         $scope.saveModifiedBeer = function() {
-            console.log("Saving $scope.beer...");
+            console.log("Saving $scope.beer...", $scope.beer);
             assert(typeof $scope.beer === "object");
 
             if($scope.beer && $scope.beer.name && $scope.beer.name != "New beer") {
