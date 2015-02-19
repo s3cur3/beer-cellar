@@ -13,6 +13,7 @@ input[type=color], input[type=date], input[type=datetime-local], input[type=date
     font-size: 16px;
 }
 
+.bar-stable .button.positive { color: #3498db; }
 
 /** Forms **/
 .right {
