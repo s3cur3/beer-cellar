@@ -8,7 +8,7 @@
         </button>
     </ion-nav-buttons>
     <ion-content class="has-header">
-        <ion-list>
+        <ion-list can-swipe="true">
             <group label="{{ style }}" ng-repeat="(style, beers) in brewerysBeersChunkedByStyle" ng-show="beers.length > 0">
                 <ion-item ng-repeat="b in beers" href="#/app/types/{{ b.name }}">
                     <div class="card-right">

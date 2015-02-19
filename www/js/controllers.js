@@ -296,8 +296,13 @@ angular.module('BeerCellarApp.controllers', [])
                 $scope.beer = {};
                 $location.path('app/dates');
             }, function() {
-                console.error("Failed to delete beer!");
+                console.error("Failed to delete beer!", $scope.beerToDelete);
             });
+        };
+        // No popup, just do the deletion
+        $scope.seriouslyDelete = function(beer) {
+            $scope.beerToDelete = beer;
+            $scope._delete();
         };
         $scope.closeDelete = function() {
             $scope.deleteModal.hide();
