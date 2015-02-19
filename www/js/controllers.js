@@ -175,6 +175,17 @@ angular.module('BeerCellarApp.controllers', [])
                         $scope.beer = b;
                     });
                 }
+
+                // Update our stats
+                for(var i = 0; i < $scope.beers.length; i++) {
+                    var b = $scope.beers[i];
+                    $scope.stats.bottles += b.quantity;
+                    $scope.stats.meanYears += b.drinkAfterYears;
+                }
+                $scope.stats.meanYears = $scope.stats.meanYears / $scope.beers.length;
+                $scope.stats.names = Object.keys($scope.beersChunkedByName).length;
+                $scope.stats.breweries = Object.keys($scope.beersChunkedByBrewery).length;
+                $scope.stats.entries = $scope.beers.length;
             });
         };
 
@@ -232,6 +243,13 @@ angular.module('BeerCellarApp.controllers', [])
             "40 oz."
         ];
         $scope.styles = Styles;
+        $scope.stats = {
+            bottles: 0,
+            names: 0,
+            entries: 0,
+            breweries: 0,
+            meanYears: 0
+        };
 
 
         // Check that we're signed in
