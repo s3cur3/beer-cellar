@@ -388,7 +388,7 @@ angular.module('BeerCellarFilters', [])
                         _ids: _.reduceRight(crntBeer, function(all, crnt) { return all.concat(crnt._id); }, [])
                     });
                     if(out[out.length - 1].purchaseDates.length > 1) {
-                        out[out.length - 1].href = '#/app/types/' + out[out.length - 1].name;
+                        out[out.length - 1].href = '#/app/types/' + window.encodeURIComponent(out[out.length - 1].name);
                     } else {
                         out[out.length - 1].href = '#/app/beers/' + out[out.length - 1]._ids[0];
                     }
@@ -461,4 +461,7 @@ angular.module('BeerCellarFilters', [])
         return function( beerList ) {
             return beerList;
         };
+    })
+    .filter('escape', function() {
+        return window.encodeURIComponent;
     });

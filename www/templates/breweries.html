@@ -10,7 +10,7 @@
     </ion-nav-buttons>
     <ion-content class="has-header">
         <ion-list>
-            <ion-item ng-repeat="(brewery, beers) in beersChunkedByBrewery" href="#/app/breweries/{{brewery}}">
+            <ion-item ng-repeat="(brewery, beers) in beersChunkedByBrewery" href="#/app/breweries/{{brewery | escape}}">
                 <h2>{{brewery}}</h2>
                 <div class="badge badge-positive">{{beers.length}}</div>
             </ion-item>

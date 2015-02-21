@@ -454,7 +454,7 @@ angular.module('BeerCellarApp.controllers', [])
         // Update the currently-in-use brewery when we load this one
         var re = /[^\/]+$/; // matches everything from the last / to the end of the string
         $scope.brewery = $location.url().match(re)[0];
-        $scope.brewery = $scope.brewery.replace(/%20/g, " ");
+        $scope.brewery = window.decodeURIComponent($scope.brewery);
 
         $scope.$watch('beersChunkedByStyle', function() {
             $scope.brewerysBeersChunkedByStyle = $scope.beersChunkedByStyle;
@@ -484,7 +484,7 @@ angular.module('BeerCellarApp.controllers', [])
         // Update the currently-in-use brewery when we load this one
         var re = /[^\/]+$/; // matches everything from the last / to the end of the string
         $scope.beerType = $location.url().match(re)[0];
-        $scope.beerType = $scope.beerType.replace(/%20/g, " ");
+        $scope.beerType = window.decodeURIComponent($scope.beerType);
 
         $scope.$watch('beers', function() {
             $scope.typesBeers = _.filter($scope.beers, function(beer) {

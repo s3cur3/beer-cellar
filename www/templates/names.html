@@ -10,7 +10,7 @@
     </ion-nav-buttons>
     <ion-content class="has-header">
         <ion-list>
-            <ion-item ng-repeat="(name, beers) in beersChunkedByName" href="#/app/types/{{ name }}">
+            <ion-item ng-repeat="(name, beers) in beersChunkedByName" href="#/app/types/{{ name | escape }}">
                 <group label="{{ name }} &mdash; {{ beers[0].brewery }}">
                     <ion-item ng-repeat="b in beers" href="#/app/beers/{{b._id}}">
                         <div class="card-right" ng-if="b.purchaseDate && b.drinkAfterYears">
