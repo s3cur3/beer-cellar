@@ -1,7 +1,7 @@
 
 function backBtnIsVisible() {
     var btnFound = $(".back-button").length > 0;
-    return $(".back-button").is(":visible") || (btnFound && $(".back-button.ng-hide").length == 0);
+    return $(".back-button").is(":visible") || (btnFound && $(".back-button.hide").length == 0);
 }
 
 var hideShowTimeouts = [];
@@ -9,7 +9,7 @@ function hideOrShowBackBtn() {
     var DEBUG_BACK_BTN = false;
 
     function hideOrShowBackBtnNonRecursive() {
-        var menuBtn = $('.buttons.left-buttons');
+        var menuBtn = $('ion-header-bar .left-buttons');
         if( backBtnIsVisible() ) {
             if(DEBUG_BACK_BTN) console.log("back btn found");
             menuBtn.hide();
