@@ -51,6 +51,8 @@
   "cordovaPlugins": [
     "org.apache.cordova.statusbar",
     "org.apache.cordova.device",
-    "com.ionic.keyboard"
+    "com.ionic.keyboard",
+    "git://github.com/j3k0/PhoneGap-InAppPurchase-iOS.git",
+    "https://github.com/poiuytrez/AndroidInAppBilling.git"
   ]
 }

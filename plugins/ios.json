@@ -36,6 +36,12 @@
                             "xml": "false",
                             "count": 1
                         }
+                    ],
+                    "StoreKit.framework": [
+                        {
+                            "xml": "false",
+                            "count": 1
+                        }
                     ]
                 }
             },
@@ -69,6 +75,10 @@
                         {
                             "xml": "<feature name=\"Keyboard\"><param name=\"ios-package\" onload=\"true\" value=\"IonicKeyboard\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"InAppPurchase\"><param name=\"ios-package\" value=\"InAppPurchase\" /></feature>",
+                            "count": 1
                         }
                     ]
                 }
@@ -89,6 +99,9 @@
             "PACKAGE_NAME": "com.ionicframework.starter"
         },
         "com.ionic.keyboard": {
+            "PACKAGE_NAME": "com.ionicframework.starter"
+        },
+        "cc.fovea.cordova.purchase": {
             "PACKAGE_NAME": "com.ionicframework.starter"
         }
     },
