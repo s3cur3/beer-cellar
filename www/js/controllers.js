@@ -37,6 +37,24 @@ if(!runningOnDevice()) {
 angular.module('BeerCellarApp.controllers', [])
 
     .controller('AppCtrl', ['$scope', '$kinvey', '$state', '$location', '$ionicModal', '$filter', 'BeerService', 'UserService', 'CameraFactory', function($scope, $kinvey, $state, $location, $ionicModal, $filter, BeerService, UserService, CameraFactory) {
+        $scope._buy = function(productID) {
+            if(ionic.Platform.isAndroid() && typeof inappbilling !== "undefined") {
+                inappbilling.buy(function(data) {
+                        console.log("BILLING: One month subscription purchased");
+                    }, function(errorBuy) {
+                        console.error("BILLING: Error purchasing one month subscription", errorBuy);
+                    },
+                    productID);
+            } else {
+                console.error("Buying not supported.");
+                console.error("Platform is Android:", ionic.Platform.isAndroid());
+                console.error("IAB:", inappbilling);
+            }
+        };
+        $scope.buyOneMonthSubscription = function() { $scope._buy(PURCHASE_ID_ONE_MONTH); };
+        $scope.buyOneYearSubscription = function() { $scope._buy(PURCHASE_ID_ONE_YEAR); };
+        $scope.buyLifetime = function() { $scope._buy(PURCHASE_ID_LIFETIME); };
+
         $scope.getDatesChunked = function() {
             var chunks = [];
 
@@ -273,6 +291,19 @@ angular.module('BeerCellarApp.controllers', [])
             }
         });
 
+
+        // Set up purchases
+        if(ionic.Platform.isAndroid() && typeof inappbilling !== "undefined") {
+            inappbilling.getPurchases(
+                function(result) {
+                    console.log("BILLING: Purchases retrieved:", result);
+                    $scope.purchasesRetrieved = result;
+                },
+                function(errorPurchases) {
+                    console.error("BILLING: Purchase retrieval error:", errorPurchases);
+                    $scope.purchasesRetrieved = errorPurchases;
+                });
+        }
 
 
         /**

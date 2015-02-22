@@ -95,6 +95,18 @@ beerCellarApp
              Create the prefixes for File functions and FileTransfer functions for Android and IOS
              */
             if(ionic.Platform.isAndroid()) {
+                if(typeof inappbilling !== "undefined") {
+                    inappbilling.init(
+                        function(resultInit) {
+                            console.log("BILLING: Initialized");
+                        },
+                        function(errorInit) {
+                            console.error("BILLING: Initialization error:", errorInit);
+                        },
+                        {showLog: true},
+                        [PURCHASE_ID_ONE_MONTH, PURCHASE_ID_ONE_YEAR, PURCHASE_ID_LIFETIME]);
+                }
+
                 console.log('cordova.file.externalDataDirectory: ' + cordova.file.externalDataDirectory);
                 myFsRootDirectory1 = 'file:///storage/emulated/0/'; // path for tablet
                 myFsRootDirectory2 = 'file:///storage/sdcard0/'; // path for phone
