@@ -78,12 +78,14 @@ $injector.invoke(["$kinvey", "$window", "$rootScope", function($kinvey, $window,
 
 beerCellarApp
     .run(['$ionicPlatform', function ($ionicPlatform) {
-        $ionicPlatform.ready(function() {
+        console.log("READY: Got Angular run() call");
+        ionic.Platform.ready(function() {
             if(window.StatusBar) {
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
             }
 
+            console.log("READY: Launched on platform", ionic.Platform.platform());
             /*
              Set up file system variables
 
@@ -95,43 +97,23 @@ beerCellarApp
              Create the prefixes for File functions and FileTransfer functions for Android and IOS
              */
             if(ionic.Platform.isAndroid()) {
-                if(typeof inappbilling !== "undefined") {
+                if(typeof inappbilling !== "undefined" && !g_billing_initialized) {
                     inappbilling.init(
                         function(resultInit) {
                             console.log("BILLING: Initialized");
+                            g_billing_initialized = true;
                         },
                         function(errorInit) {
                             console.error("BILLING: Initialization error:", errorInit);
                         },
                         {showLog: true},
                         [PURCHASE_ID_ONE_MONTH, PURCHASE_ID_ONE_YEAR, PURCHASE_ID_LIFETIME]);
+                } else {
+                    console.error("BILLING: Got undefined inappbilling object");
                 }
-
-                console.log('cordova.file.externalDataDirectory: ' + cordova.file.externalDataDirectory);
-                myFsRootDirectory1 = 'file:///storage/emulated/0/'; // path for tablet
-                myFsRootDirectory2 = 'file:///storage/sdcard0/'; // path for phone
-                fileTransferDir = cordova.file.externalDataDirectory;
-                if(fileTransferDir.indexOf(myFsRootDirectory1) === 0) {
-                    fileDir = fileTransferDir.replace(myFsRootDirectory1, '');
-                }
-                if(fileTransferDir.indexOf(myFsRootDirectory2) === 0) {
-                    fileDir = fileTransferDir.replace(myFsRootDirectory2, '');
-                }
-                console.log('Android FILETRANSFERDIR: ' + fileTransferDir);
-                console.log('Android FILEDIR: ' + fileDir);
             }
             if(ionic.Platform.isIOS()) {
-                if(cordova && cordova.file && cordova.file.documentsDirectory) {
-                    console.log('cordova.file.documentsDirectory: ' + cordova.file.documentsDirectory);
-                    fileTransferDir = cordova.file.documentsDirectory;
-                    fileDir = '';
-                    console.log('IOS FILETRANSFERDIR: ' + fileTransferDir);
-                    console.log('IOS FILEDIR: ' + fileDir);
-                } else {
-                    if(!cordova) console.error("Cordova not defined");
-                    else if(!cordova.file) console.error("cordova.file not defined");
-                    else if(!cordova.file.documentsDirectory) console.error("cordova.file.documentsDirectory not defined");
-                }
+
             }
 
         });

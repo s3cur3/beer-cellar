@@ -11,6 +11,8 @@ var PURCHASE_ID_ONE_MONTH = "com.cisoftware.beercellar.onemonth";
 var PURCHASE_ID_ONE_YEAR = "com.cisoftware.beercellar.oneyear";
 var PURCHASE_ID_LIFETIME = "com.cisoftware.beercellar.lifetime";
 
+var g_billing_initialized = false;
+
 
 
 

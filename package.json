@@ -53,6 +53,7 @@
     "org.apache.cordova.device",
     "com.ionic.keyboard",
     "git://github.com/j3k0/PhoneGap-InAppPurchase-iOS.git",
-    "https://github.com/poiuytrez/AndroidInAppBilling.git"
+    "https://github.com/poiuytrez/AndroidInAppBilling.git",
+    "AndroidInAppBilling"
   ]
 }

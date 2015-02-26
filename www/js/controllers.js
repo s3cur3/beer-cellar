@@ -40,9 +40,9 @@ angular.module('BeerCellarApp.controllers', [])
         $scope._buy = function(productID) {
             if(ionic.Platform.isAndroid() && typeof inappbilling !== "undefined") {
                 inappbilling.buy(function(data) {
-                        console.log("BILLING: One month subscription purchased");
+                        console.log("BILLING: purchased " + productID);
                     }, function(errorBuy) {
-                        console.error("BILLING: Error purchasing one month subscription", errorBuy);
+                        console.error("BILLING: Error purchasing " + productID, errorBuy);
                     },
                     productID);
             } else {
@@ -293,17 +293,28 @@ angular.module('BeerCellarApp.controllers', [])
 
 
         // Set up purchases
-        if(ionic.Platform.isAndroid() && typeof inappbilling !== "undefined") {
-            inappbilling.getPurchases(
-                function(result) {
-                    console.log("BILLING: Purchases retrieved:", result);
-                    $scope.purchasesRetrieved = result;
-                },
-                function(errorPurchases) {
-                    console.error("BILLING: Purchase retrieval error:", errorPurchases);
-                    $scope.purchasesRetrieved = errorPurchases;
-                });
+        $scope.getPurchases = function() {
+            if(ionic.Platform.isAndroid() && typeof inappbilling !== "undefined" && g_billing_initialized) {
+                inappbilling.getPurchases(
+                    function(result) {
+                        console.log("BILLING: Purchases retrieved:", result);
+                    },
+                    function(errorPurchases) {
+                        console.error("BILLING: Purchase retrieval error:", errorPurchases);
+                    });
+            } else {
+                console.error("Couldn't load in-app billing plugin");
+            }
+        };
+        function tryPurchases() {
+            if(g_billing_initialized) {
+                $scope.getPurchases()
+            } else {
+                console.log("Billing not yet initialized...");
+                setTimeout(tryPurchases, 1000)
+            }
         }
+        tryPurchases();
 
 
         /**
