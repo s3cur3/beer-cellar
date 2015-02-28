@@ -14,8 +14,9 @@
                     Export all app data to a file
                 </a>
             </div>
+        </div>
 
-
+        <div class="content-pad" ng-show="stats.bottles > 0">
             <h2>Cellar Stats</h2>
             <p>Your cellar contains <strong>{{ stats.bottles }}</strong> bottles of <strong>{{ stats.names }}</strong> different beers from <strong>{{ stats.breweries }}</strong> different breweries.</p>
             <p>You&rsquo;re planning to age the beers an average of <strong>{{ stats.meanYears | number:1 }} years</strong>.</p>
@@ -37,6 +38,11 @@
         </button>
 
         <div class="content-pad">
+            <h2>Sign Out of Your Account</h2>
+            <a class="item button button-stable" ng-click="logout()">
+                Sign out
+            </a>
+
             <h2>Credits</h2>
             <p>Beer bottles icon created by Ivan from The Noun Project</p>
         </div>

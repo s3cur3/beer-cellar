@@ -46,7 +46,6 @@ angular.module('BeerCellarApp.services', [])
 
         return {
             /**
-             *
              * @returns {*}
              */
             activeUser: function () {
@@ -57,10 +56,9 @@ angular.module('BeerCellarApp.services', [])
                 return currentUser;
             },
             /**
-             *
              * @param {String} _username
              * @param {String} _password
-             * @returns {*}
+             * @returns {*} promise to do the login
              */
             login: function (_username, _password) {
                 //Kinvey login starts
@@ -78,6 +76,16 @@ angular.module('BeerCellarApp.services', [])
                 });
 
                 return promise;
+            },
+
+            /**
+             * @returns {*} promise to perform the logout
+             */
+            logout: function() {
+                var user = $kinvey.getActiveUser();
+                if(user !== null) {
+                    return $kinvey.User.logout();
+                }
             },
 
             createUser: function(_username, _password) {

@@ -232,21 +232,25 @@ angular.module('BeerCellarApp.controllers', [])
         };
 
         $scope.saveModifiedBeer = function() {
-            console.log("Saving $scope.beer...", $scope.beer);
-            assert(typeof $scope.beer === "object");
+            if($scope.activeUser) {
+                console.log("Saving $scope.beer...", $scope.beer);
+                assert(typeof $scope.beer === "object");
 
-            if($scope.beer && $scope.beer.name && $scope.beer.name != "New beer") {
-                BeerService.save($scope.beer).then(function(beer) {
-                    console.log("Saved beer from promise is:", beer);
-                    $scope.beer = beer;
-                    $scope.updateBeers();
-                }, function() {
-                    console.log("Failed to save beer! Trying again...");
-                    $scope.saveModifiedBeer();
-                });
+                if($scope.beer && $scope.beer.name && $scope.beer.name != "New beer") {
+                    BeerService.save($scope.beer).then(function(beer) {
+                        console.log("Saved beer from promise is:", beer);
+                        $scope.beer = beer;
+                        $scope.updateBeers();
+                    }, function() {
+                        console.log("Failed to save beer! Trying again...");
+                        $scope.saveModifiedBeer();
+                    });
+                }
             }
         };
 
+
+        $scope.activeUser = null;
 
         $scope.beers = [];
         $scope.beer =  {};
@@ -280,6 +284,16 @@ angular.module('BeerCellarApp.controllers', [])
             }, 1000);
         }
 
+        $scope.tryUpdatingActiveUser = function() {
+            if(!$scope.activeUser) {
+                $scope.activeUser = UserService.activeUser();
+            }
+            if(!$scope.activeUser) {
+                setTimeout($scope.tryUpdatingActiveUser, 2000);
+            }
+        };
+        $scope.tryUpdatingActiveUser();
+
 
         console.log("Calling for initial update of beers");
         $scope.updateBeers(true).then(function() {
@@ -311,7 +325,7 @@ angular.module('BeerCellarApp.controllers', [])
                 $scope.getPurchases()
             } else {
                 console.log("Billing not yet initialized...");
-                setTimeout(tryPurchases, 1000)
+                setTimeout(tryPurchases, 5000)
             }
         }
         tryPurchases();
@@ -326,10 +340,10 @@ angular.module('BeerCellarApp.controllers', [])
             if(!b) b = $scope.beer;
 
             if(b && b.purchaseDate && typeof b.drinkAfterYears === "number") {
-                var drinkDateStr = DateMath.getDrinkDate(b);
+                var drinkDate = DateMath.getDrinkDate(b);
                 var thisMonth = DateMath.thisMonth();
 
-                return DateMath.compare(thisMonth, drinkDateStr) >= 0;
+                return DateMath.compare(thisMonth, drinkDate) >= 0;
             } else { // beers apparently haven't been set from the DB yet
                 return false;
             }
@@ -387,8 +401,8 @@ angular.module('BeerCellarApp.controllers', [])
             $kinvey.User.logout().then(
                 function () {
                     //Kinvey logout finished with success
-                    console.log("user logout");
                     $kinvey.setActiveUser(null);
+                    $scope.activeUser = null;
                     $state.go('signin');
                 },
                 function (error) {

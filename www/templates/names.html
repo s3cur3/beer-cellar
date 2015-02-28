@@ -21,5 +21,10 @@
                 </group>
             </ion-item>
         </ion-list>
+
+        <div class="content-pad text-center mt20" ng-if="beersChunkedByDate.length === 0">
+            <h1>No beers found!</h1>
+            <p>To add one, click <strong class="positive"><i class="icon ion-ios7-plus-empty positive"></i> Add Beer</strong> in the top right</p>
+        </div>
     </ion-content>
 </ion-view>
