@@ -79,6 +79,10 @@
                         {
                             "xml": "<feature name=\"InAppPurchase\"><param name=\"ios-package\" value=\"InAppPurchase\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"AppVersion\"><param name=\"ios-package\" value=\"AppVersion\" /></feature>",
+                            "count": 1
                         }
                     ]
                 }
@@ -106,6 +110,9 @@
         },
         "com.smartmobilesoftware.androidinappbilling": {
             "PACKAGE_NAME": "com.ionicframework.starter"
+        },
+        "uk.co.whiteoctober.cordova.appversion": {
+            "PACKAGE_NAME": "com.cisoftware.beercellar"
         }
     },
     "dependent_plugins": {}
