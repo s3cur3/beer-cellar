@@ -116,6 +116,7 @@ input[type=text].item-field {
 /** Menu footer **/
 .bar-footer {
     padding: 0;
+    margin-bottom: 5px;
 }
 .bar-footer ion-list {
     width: 100%;

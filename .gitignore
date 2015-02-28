@@ -13,3 +13,4 @@ hooks/after_plugin_add/010_register_plugin.js
 hooks/after_plugin_rm/010_deregister_plugin.js
 hooks/after_prepare/020_remove_sass_from_platforms.js
 hooks/before_platform_add/init_directories.js
+BeerCellar.apk

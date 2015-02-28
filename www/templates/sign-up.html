@@ -13,7 +13,7 @@
                 <input type="password" ng-model="user.password">
             </label>
             <input value="Create Account" type="submit" class="button button-block button-positive" ng-click="createUser(user)">
-            <span class="error" ng-show="submittedError">{{errorDescription}}</span>
+            <p class="alert-warning content-pad" ng-show="submittedError">{{errorDescription}}</p>
 
             <div class="item spacer invisible">
             </div>

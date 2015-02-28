@@ -195,6 +195,8 @@ angular.module('BeerCellarApp.controllers', [])
                 }
 
                 // Update our stats
+                $scope.stats.bottles = 0;
+                $scope.stats.meanYears = 0;
                 for(var i = 0; i < $scope.beers.length; i++) {
                     var b = $scope.beers[i];
                     $scope.stats.bottles += b.quantity;
@@ -285,6 +287,7 @@ angular.module('BeerCellarApp.controllers', [])
         }
 
         $scope.tryUpdatingActiveUser = function() {
+            console.log("Attempting to update $scope.activeUser");
             if(!$scope.activeUser) {
                 $scope.activeUser = UserService.activeUser();
             }
