@@ -79,24 +79,17 @@ $injector.invoke(["$kinvey", "$window", "$rootScope", function($kinvey, $window,
 beerCellarApp
     .run(['$ionicPlatform', function ($ionicPlatform) {
         console.log("READY: Got Angular run() call");
-        ionic.Platform.ready(function() {
+        $ionicPlatform.ready(function() {
             if(window.StatusBar) {
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
             }
 
-            console.log("READY: Launched on platform", ionic.Platform.platform());
-            /*
-             Set up file system variables
+            console.log("READY: Launched on platform", $ionicPlatform.platform());
 
-             Note:
-             -	Android and IOS have other directorynames for files
-             -	$cordovaFile functions prefixes all pathnames with root
-             $cordovaFileTransfer functions needs absolute pathnames
-
-             Create the prefixes for File functions and FileTransfer functions for Android and IOS
-             */
-            if(ionic.Platform.isAndroid()) {
+            if($ionicPlatform.isAndroid()) {
+                //
+                // Set up billing
                 if(typeof inappbilling !== "undefined" && !g_billing_initialized) {
                     inappbilling.init(
                         function(resultInit) {
@@ -111,8 +104,15 @@ beerCellarApp
                 } else {
                     console.error("BILLING: Got undefined inappbilling object");
                 }
+
+                //
+                // Set up the Android back button
+                $ionicPlatform.registerBackButtonAction(function(event) {
+                    console.log("Back button pressed!");
+                    $ionicHistory.goBack();
+                }, 100);
             }
-            if(ionic.Platform.isIOS()) {
+            if($ionicPlatform.isIOS()) {
 
             }
 

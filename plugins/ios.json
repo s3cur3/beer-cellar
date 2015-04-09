@@ -77,11 +77,11 @@
                             "count": 1
                         },
                         {
-                            "xml": "<feature name=\"InAppPurchase\"><param name=\"ios-package\" value=\"InAppPurchase\" /></feature>",
+                            "xml": "<feature name=\"AppVersion\"><param name=\"ios-package\" value=\"AppVersion\" /></feature>",
                             "count": 1
                         },
                         {
-                            "xml": "<feature name=\"AppVersion\"><param name=\"ios-package\" value=\"AppVersion\" /></feature>",
+                            "xml": "<feature name=\"InAppPurchase\"><param name=\"ios-package\" value=\"InAppPurchase\" /></feature>",
                             "count": 1
                         }
                     ]
@@ -105,13 +105,13 @@
         "com.ionic.keyboard": {
             "PACKAGE_NAME": "com.ionicframework.starter"
         },
-        "cc.fovea.cordova.purchase": {
-            "PACKAGE_NAME": "com.ionicframework.starter"
-        },
         "com.smartmobilesoftware.androidinappbilling": {
             "PACKAGE_NAME": "com.ionicframework.starter"
         },
         "uk.co.whiteoctober.cordova.appversion": {
+            "PACKAGE_NAME": "com.cisoftware.beercellar"
+        },
+        "cc.fovea.cordova.purchase": {
             "PACKAGE_NAME": "com.cisoftware.beercellar"
         }
     },
