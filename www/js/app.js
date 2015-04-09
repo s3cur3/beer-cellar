@@ -77,17 +77,17 @@ $injector.invoke(["$kinvey", "$window", "$rootScope", function($kinvey, $window,
 }]);
 
 beerCellarApp
-    .run(['$ionicPlatform', function ($ionicPlatform) {
+    .run(['$ionicPlatform', '$ionicHistory', function ($ionicPlatform, $ionicHistory) {
         console.log("READY: Got Angular run() call");
-        $ionicPlatform.ready(function() {
+        ionic.Platform.ready(function() {
             if(window.StatusBar) {
                 // org.apache.cordova.statusbar required
                 StatusBar.styleDefault();
             }
 
-            console.log("READY: Launched on platform", $ionicPlatform.platform());
+            console.log("READY: Launched on platform", ionic.Platform.platform());
 
-            if($ionicPlatform.isAndroid()) {
+            if(ionic.Platform.isAndroid()) {
                 //
                 // Set up billing
                 if(typeof inappbilling !== "undefined" && !g_billing_initialized) {
@@ -109,10 +109,12 @@ beerCellarApp
                 // Set up the Android back button
                 $ionicPlatform.registerBackButtonAction(function(event) {
                     console.log("Back button pressed!");
+                    console.log(ionic);
+                    console.log(ionic.Platform);
                     $ionicHistory.goBack();
                 }, 100);
             }
-            if($ionicPlatform.isIOS()) {
+            if(ionic.Platform.isIOS()) {
 
             }
 

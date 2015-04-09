@@ -57,5 +57,6 @@
     "AndroidInAppBilling",
     "https://github.com/whiteoctober/cordova-plugin-app-version.git",
     "cc.fovea.cordova.purchase"
-  ]
+  ],
+  "cordovaPlatforms": []
 }
