@@ -20,7 +20,7 @@ module.exports = function (config) {
             'bower_components/lodash/dist/lodash.min.js',
             'www/lib/ionic/js/ionic.bundle.js',
             'www/js/app.js',
-            'www/js/controllers.js',
+            'www/js/controller-utils.js',
             'www/js/**/*.js',
             'test/mock/**/*.js',
             'test/spec/**/*.js',

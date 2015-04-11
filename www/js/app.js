@@ -1,36 +1,33 @@
-var Styles = [
-    "IPA",
-    "Double IPA",
-    "Belgian IPA",
-    "Stout",
-    "Imperial Stout",
-    "Scotch Ale",
-    "Saison/Farmhouse Ale",
-    "Belgian Blonde Ale",
-    "Sour/Wild Ale",
-    "Dubbel",
-    "Tripel",
-    "Quadruppel",
-    "Belgian (Other)",
-    "Barleywine",
-    "Rye Ale",
-    "Strong Ale",
-    "Old Ale",
-    "Other"
-];
-
 
 // selects the desired state chnage behavior depending on whether the user is logged or not
 function determineKinveyBehavior($window, activeUser) {
     if(activeUser === null || !activeUser) {
-        console.log("Redirecting to signin");
-        $window.location = 'sign-in';
-    } else if($window.location.toString().indexOf('sign-in') > -1) {
+        console.log("Redirecting to init");
+        $window.location = '#/init';
+    } else if($window.location.toString().indexOf('init') > -1) {
         $window.location = 'app/dates';
     }
 }
 
-var deps = ['ionic', 'kinvey', 'ngCordova', 'BeerCellarApp.controllers', 'BeerCellarFilters', 'BeerCellarApp.services'];
+var deps = [
+    'ionic',
+    'kinvey',
+    'ngCordova',
+    'BeerCellarApp.controllers.AppCtrl',
+    'BeerCellarApp.controllers.AppInitCtrl',
+    'BeerCellarApp.controllers.BeerCtrl',
+    'BeerCellarApp.controllers.BeersCtrl',
+    'BeerCellarApp.controllers.BeerTypeCtrl',
+    'BeerCellarApp.controllers.BeerTypesCtrl',
+    'BeerCellarApp.controllers.BreweryCtrl',
+    'BeerCellarApp.controllers.ExportCtrl',
+    'BeerCellarApp.controllers.InitPurchaseCtrl',
+    'BeerCellarApp.controllers.SettingsCtrl',
+    'BeerCellarApp.controllers.SignInCtrl',
+    'BeerCellarApp.controllers.SignUpCtrl',
+    'BeerCellarFilters',
+    'BeerCellarApp.services'
+];
 var beerCellarApp = angular.module('BeerCellarApp', deps);
 
 // Inject Kinvey MBaaS *before* the rest of the app is allowed to init
@@ -52,7 +49,7 @@ $injector.invoke(["$kinvey", "$window", "$rootScope", function($kinvey, $window,
 
         angular.bootstrap(document, ['BeerCellarApp']);
 
-        uuid = activeUser.username;
+        uuid = activeUser ? activeUser.username : 'local';
 
         determineKinveyBehavior($window, activeUser);
 
@@ -64,8 +61,8 @@ $injector.invoke(["$kinvey", "$window", "$rootScope", function($kinvey, $window,
 
         // setup the stateChange listener
         $rootScope.$on("$stateChangeStart", function (event, toState) {
-            if(toState.name !== 'signin') {
-                console.log("Tried to change to non-signin state");
+            if(toState.name !== 'init') {
+                console.log("Tried to change to non-init state");
                 determineKinveyBehavior($state, activeUser);
             }
         });
@@ -146,10 +143,21 @@ beerCellarApp
                 controller: 'AppCtrl'
             })
 
+            .state('initPreSubscription', {
+                url: "/init",
+                templateUrl: "templates/init-pre-subscription.html",
+                controller: 'AppInitCtrl'
+            })
+            .state('purchase', {
+                url: "/purchase",
+                templateUrl: "templates/init-purchase-subscription.html",
+                controller: 'InitPurchaseCtrl'
+            })
+
             .state('signin', {
                 url: "/sign-in",
                 templateUrl: "templates/sign-in.html",
-                controller: 'AppInitCtrl'
+                controller: 'SignInCtrl'
             })
 
             .state('signup', {

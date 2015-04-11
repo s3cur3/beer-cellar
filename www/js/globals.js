@@ -44,6 +44,10 @@ function checkSubscriptions(hasSubscriptionObj) {
     }
     if(ionic.Platform.isIOS()) {
         // TODO: iOS Billing
+    } else {
+        return {
+            then: function(ignored) {}
+        };
     }
 }
 
@@ -108,3 +112,24 @@ function assert( testResult, optionalErrorMsg ) {
 function runningOnDevice() {
     return /ios|iphone|ipod|ipad|android/i.test(navigator.userAgent);
 }
+
+var Styles = [
+    "IPA",
+    "Double IPA",
+    "Belgian IPA",
+    "Stout",
+    "Imperial Stout",
+    "Scotch Ale",
+    "Saison/Farmhouse Ale",
+    "Belgian Blonde Ale",
+    "Sour/Wild Ale",
+    "Dubbel",
+    "Tripel",
+    "Quadruppel",
+    "Belgian (Other)",
+    "Barleywine",
+    "Rye Ale",
+    "Strong Ale",
+    "Old Ale",
+    "Other"
+];

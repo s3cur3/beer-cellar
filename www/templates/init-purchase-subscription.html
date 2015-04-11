@@ -1,0 +1,34 @@
+<ion-view title="Purchase a Subscription">
+    <div class="bar bar-header bar-stable">
+        <h1 class="title">Purchase a Subscription</h1>
+    </div>
+    <ion-content class="has-header">
+        <p  class="content-pad">If you&rsquo;ve purchased a subscription in the past, you can restore it now. Alternatively, you can subscribe to the Aficionado service now.</p>
+        <button class="item button button-full button-positive" ng-click="restorePurchase()">
+            Restore a previously purchased subscription
+        </button>
+
+
+        <div class="item spacer invisible">
+        </div>
+
+        <button class="item button button-full button-stable" ng-click="buyOneMonthSubscription()">
+            Upgrade to Aficionado (1 Month)
+        </button>
+        <button class="item button button-full button-positive" ng-click="buyOneYearSubscription()">
+            Upgrade to Aficionado (1 Year)
+        </button>
+        <button class="item button button-full button-balanced" ng-click="buyLifetime()">
+            <i class="icon ion-ios7-star mr5"></i>
+            Upgrade to Aficionado (Forever)
+        </button>
+
+
+        <div class="item spacer invisible">
+        </div>
+
+        <button class="item button button-full" ng-click="wantsLocalOnly()">
+            Use the free version instead
+        </button>
+    </ion-content>
+</ion-view>

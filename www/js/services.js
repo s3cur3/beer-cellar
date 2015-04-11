@@ -50,9 +50,15 @@ angular.module('BeerCellarApp.services', [])
              */
             activeUser: function () {
                 if(currentUser === null) {
-                    console.log("Refreshing active user!");
-                    currentUser = User.build($kinvey.getActiveUser());
+                    if(g_local_account_only) {
+                        console.log("Refreshing active user (local only)");
+                        currentUser = User.build({username: 'local', _id: 'local'});
+                    } else {
+                        console.log("Refreshing active user from Kinvey");
+                        currentUser = User.build($kinvey.getActiveUser());
+                    }
                 }
+                uuid = currentUser.username;
                 return currentUser;
             },
             /**
@@ -324,33 +330,5 @@ angular.module('BeerCellarApp.services', [])
             }
         };
     })
-
-    .factory('CameraFactory', ['$q', function($q) {
-        if( ionic.Platform.isWebView() && ionic.Platform.isReady ) { // running in the Cordova Web view
-            return {
-                getPicture: function(options) {
-                    var q = $q.defer();
-
-                    navigator.camera.getPicture(function(result) {
-                        // Do any magic you need
-                        q.resolve(result);
-                    }, function(err) {
-                        q.reject(err);
-                    }, options);
-
-                    return q.promise;
-                }
-            }
-        } else {
-            return {
-                getPicture: function(options) {
-                    // TODO: Web implementation?
-                    return null;
-                }
-            }
-        }
-
-    }])
-
 
 ;
