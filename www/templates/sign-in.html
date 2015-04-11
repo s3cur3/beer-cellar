@@ -1,9 +1,60 @@
-<ion-view title="Sign In">
+<ion-view title="Sign In to Your Beer Cellar">
     <div class="bar bar-header bar-stable">
-        <h1 class="title">Sign In</h1>
+        <h1 class="title">Sign In to Your Beer Cellar</h1>
     </div>
     <ion-content class="has-header">
-        <form class="list">
+        <div ng-show="state === StateType.OFFER_SUBSCRIPTION">
+            <h1 class="content-pad">Your beer cellar awaits&hellip;</h1>
+
+            <button class="item button button-full button-positive" ng-click="advanceState(StateType.WANTS_LOCAL_ONLY)">
+                Use the free version
+            </button>
+
+            <button class="item button button-full button-positive" ng-click="advanceState(StateType.WANTS_PURCHASE)">
+                I have an Aficionado subscription
+            </button>
+
+            <div class="content-pad">
+                <p>The free version of Beer Cellar stores your beer data on this device only.</p>
+                <p>Or, you can upgrade to a paid Aficionado account to sync your data to <em>all</em> your devices&hellip; plus get Aficionado-only features.</p>
+            </div>
+        </div>
+
+        <div ng-show="state === StateType.WANTS_PURCHASE">
+            <p  class="content-pad">If you&rsquo;ve purchased a subscription in the past, you can restore it now. Alternatively, you can subscribe to the Aficionado service now.</p>
+            <button class="item button button-full button-positive" ng-click="advanceState(StateType.RESTORE_PURCHASE)">
+                Restore a previously purchased subscription
+            </button>
+
+
+            <div class="item spacer invisible">
+            </div>
+
+            <button class="item button button-full button-stable" ng-click="buyOneMonthSubscription()">
+                Upgrade to Aficionado (1 Month)
+            </button>
+            <button class="item button button-full button-positive" ng-click="buyOneYearSubscription()">
+                Upgrade to Aficionado (1 Year)
+            </button>
+            <button class="item button button-full button-balanced" ng-click="buyLifetime()">
+                <i class="icon ion-ios7-star mr5"></i>
+                Upgrade to Aficionado (Forever)
+            </button>
+
+
+            <div class="item spacer invisible">
+            </div>
+
+            <button class="item button button-full" ng-click="advanceState(StateType.WANTS_LOCAL_ONLY)">
+                Use the free version instead
+            </button>
+        </div>
+
+        <div ng-show="state === StateType.WANTS_LOCAL_ONLY">
+            <h1 class="content-pad">Setting up the app&hellip;</h1>
+        </div>
+
+        <form class="list" ng-show="state === StateType.SUBSCRIPTION_FOUND">
             <label class="item item-input">
                 <span class="input-label">Email</span>
                 <input type="email" ng-model="user.username">

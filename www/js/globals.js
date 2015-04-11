@@ -12,10 +12,40 @@ var PURCHASE_ID_ONE_YEAR = "com.cisoftware.beercellar.oneyear";
 var PURCHASE_ID_LIFETIME = "com.cisoftware.beercellar.lifetime";
 
 var g_billing_initialized = false;
+var g_local_account_only = true;
 
 
 
+function androidCheckSubscriptions() {
+    return inappbilling.getPurchases(
+        function success(ownedProductsArray) {
+            for(var i = 0; i < ownedProductsArray.length; i++) {
+                var product = ownedProductsArray[i];
+                if(product.productId == PURCHASE_ID_ONE_MONTH ||
+                        product.productId == PURCHASE_ID_ONE_YEAR ||
+                        product.productId == PURCHASE_ID_LIFETIME) {
+                    console.log("EXCELLENT! User has subscription:", product.productId);
+                    g_local_account_only = false;
+                }
+            }
+        },
+        function failure() {
+            console.error("Error retrieving purchases...");
+        }
+    );
+}
 
+/**
+ * @return Promise
+ */
+function checkSubscriptions(hasSubscriptionObj) {
+    if(ionic.Platform.isAndroid()) {
+        return androidCheckSubscriptions(hasSubscriptionObj);
+    }
+    if(ionic.Platform.isIOS()) {
+        // TODO: iOS Billing
+    }
+}
 
 
 

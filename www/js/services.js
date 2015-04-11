@@ -49,7 +49,7 @@ angular.module('BeerCellarApp.services', [])
              * @returns {*}
              */
             activeUser: function () {
-                if (currentUser === null) {
+                if(currentUser === null) {
                     console.log("Refreshing active user!");
                     currentUser = User.build($kinvey.getActiveUser());
                 }
@@ -69,6 +69,7 @@ angular.module('BeerCellarApp.services', [])
                 });
 
                 promise.then(function (response) {
+                    g_local_account_only = false;
                     return User.build(response);
                 }, function (error) {
                     //Kinvey login finished with error

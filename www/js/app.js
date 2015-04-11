@@ -78,6 +78,35 @@ $injector.invoke(["$kinvey", "$window", "$rootScope", function($kinvey, $window,
 
 beerCellarApp
     .run(['$ionicPlatform', '$ionicHistory', function ($ionicPlatform, $ionicHistory) {
+        function initBilling() {
+            g_billing_initialized = false;
+            g_local_account_only = true;
+
+            if(ionic.Platform.isAndroid()) {
+                //
+                // Set up billing
+                if(typeof inappbilling !== "undefined" && !g_billing_initialized) {
+                    inappbilling.init(
+                        function success(resultInit) {
+                            console.log("BILLING: Initialized");
+                            g_billing_initialized = true;
+                            androidCheckSubscriptions();
+                        },
+                        function failure(errorInit) {
+                            console.error("BILLING: Initialization error:", errorInit);
+                        },
+                        {showLog: true},
+                        [PURCHASE_ID_ONE_MONTH, PURCHASE_ID_ONE_YEAR, PURCHASE_ID_LIFETIME]);
+                } else {
+                    console.error("BILLING: Got undefined inappbilling object");
+                }
+            }
+            if(ionic.Platform.isIOS()) {
+                // TODO: iOS Billing
+            }
+        }
+
+
         console.log("READY: Got Angular run() call");
         ionic.Platform.ready(function() {
             if(window.StatusBar) {
@@ -87,24 +116,10 @@ beerCellarApp
 
             console.log("READY: Launched on platform", ionic.Platform.platform());
 
-            if(ionic.Platform.isAndroid()) {
-                //
-                // Set up billing
-                if(typeof inappbilling !== "undefined" && !g_billing_initialized) {
-                    inappbilling.init(
-                        function(resultInit) {
-                            console.log("BILLING: Initialized");
-                            g_billing_initialized = true;
-                        },
-                        function(errorInit) {
-                            console.error("BILLING: Initialization error:", errorInit);
-                        },
-                        {showLog: true},
-                        [PURCHASE_ID_ONE_MONTH, PURCHASE_ID_ONE_YEAR, PURCHASE_ID_LIFETIME]);
-                } else {
-                    console.error("BILLING: Got undefined inappbilling object");
-                }
+            initBilling();
 
+            // Misc platform-specific setup
+            if(ionic.Platform.isAndroid()) {
                 //
                 // Set up the Android back button
                 $ionicPlatform.registerBackButtonAction(function(event) {
@@ -134,7 +149,7 @@ beerCellarApp
             .state('signin', {
                 url: "/sign-in",
                 templateUrl: "templates/sign-in.html",
-                controller: 'SignInCtrl'
+                controller: 'AppInitCtrl'
             })
 
             .state('signup', {

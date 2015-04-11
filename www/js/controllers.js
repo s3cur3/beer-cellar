@@ -417,8 +417,77 @@ angular.module('BeerCellarApp.controllers', [])
         $scope.runningOnDevice = runningOnDevice;
     }])
 
-    .controller('SignInCtrl', ['$scope', '$kinvey', '$state', 'UserService', function ($scope, $kinvey, $state, UserService) {
-        console.log('Sign In Ctrl');
+    .controller('AppInitCtrl', ['$scope', '$kinvey', '$state', 'UserService', function ($scope, $kinvey, $state, UserService) {
+        console.log('App Init Ctrl');
+        $scope.StateType = {
+            OFFER_SUBSCRIPTION: 1,
+            WANTS_LOCAL_ONLY: 2,
+            WANTS_PURCHASE: 3,
+            SUBSCRIPTION_FOUND: 4,
+            GETS_SYNCED_MODE: 5,
+            NEEDS_LOGIN: 6,
+            RESTORE_PURCHASE: 7,
+            NEW_PURCHASE: 8
+        };
+        $scope.advanceState = function(newState) {
+
+
+            switch(newState) {
+                case $scope.StateType.OFFER_SUBSCRIPTION:
+                    // We can only get to this state from a new app launch (before state is set)
+                    assert(!$scope.state);
+                    $scope.state = newState;
+                    $scope.doCheckSubscriptions();
+                    break;
+                case $scope.StateType.WANTS_LOCAL_ONLY:
+                    assert($scope.state === $scope.StateType.OFFER_SUBSCRIPTION || $scope.state === $scope.StateType.WANTS_PURCHASE);
+                    $scope.state = newState;
+                    g_local_account_only = true;
+                    break;
+                case $scope.StateType.WANTS_PURCHASE:
+                    assert($scope.state === $scope.StateType.OFFER_SUBSCRIPTION);
+                    $scope.state = newState;
+
+                    g_local_account_only = false;
+                    if(ionic.Platform.isAndroid()) {
+
+                    } else if(ionic.Platform.isIOS()) {
+                        // TODO: iOS Billing
+                    } else {
+                        alert("Purchasing not supported!!");
+                    }
+                    break;
+                case $scope.StateType.RESTORE_PURCHASE:
+                    assert($scope.state === $scope.StateType.WANTS_PURCHASE);
+                    $scope.state = newState;
+                    $scope.doCheckSubscriptions();
+                    break;
+                case $scope.StateType.NEW_PURCHASE:
+                    assert($scope.state === $scope.StateType.WANTS_PURCHASE);
+                    $scope.state = newState;
+                    break;
+                case $scope.StateType.SUBSCRIPTION_FOUND:
+                    assert($scope.state === $scope.StateType.WANTS_PURCHASE || $scope.state === $scope.StateType.RESTORE_PURCHASE || $scope.state === $scope.StateType.OFFER_SUBSCRIPTION);
+                    $scope.state = newState;
+                    break;
+                default:
+                    assert(false, "Unknown state!");
+                    break;
+            }
+        };
+        $scope.advanceState($scope.StateType.OFFER_SUBSCRIPTION);
+
+        $scope.doCheckSubscriptions = function () {
+            checkSubscriptions().then(
+                function(ownedProductsArray) {
+                    if(ownedProductsArray.length > 0) {
+                        console.log("USER HAS SUBSCRIPTION");
+                        $scope.advanceState($scope.StateType.SUBSCRIPTION_FOUND);
+                    }
+                }
+            );
+        };
+
         $scope.redirectIfLoggedIn = function() {
             if(UserService.activeUser()) {
                 console.log("Had active user!");
@@ -427,9 +496,7 @@ angular.module('BeerCellarApp.controllers', [])
                 setTimeout($scope.redirectIfLoggedIn, 1000);
             }
         };
-
         setTimeout($scope.redirectIfLoggedIn, 500);
-
 
         $scope.signIn = function (user) {
             console.log('Sign In', user);
