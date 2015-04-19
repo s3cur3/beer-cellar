@@ -1,22 +1,27 @@
 angular.module('BeerCellarApp.controllers.AppCtrl', [])
     .controller('AppCtrl', ['$scope', '$kinvey', '$state', '$location', '$ionicModal', '$filter', 'BeerService', 'UserService', function($scope, $kinvey, $state, $location, $ionicModal, $filter, BeerService, UserService) {
-        $scope._buy = function(productID) {
-            if(ionic.Platform.isAndroid() && typeof inappbilling !== "undefined") {
-                inappbilling.buy(function(data) {
-                        console.log("BILLING: purchased " + productID);
-                    }, function(errorBuy) {
-                        console.error("BILLING: Error purchasing " + productID, errorBuy);
-                    },
-                    productID);
-            } else {
-                console.error("Buying not supported.");
-                console.error("Platform is Android:", ionic.Platform.isAndroid());
-                console.error("IAB:", inappbilling);
-            }
+        $scope.buyOneMonthSubscription = function() { purchase(PURCHASE_ID_ONE_MONTH); };
+        $scope.buyOneYearSubscription = function() { purchase(PURCHASE_ID_ONE_YEAR); };
+        $scope.buyLifetime = function() { purchase(PURCHASE_ID_LIFETIME); };
+
+        $scope.doCheckSubscriptions = function () {
+            console.log("Checking subs...");
+            checkSubscriptions().then(
+                function(ownedProductsArray) {
+                    if(ownedProductsArray.length > 0) {
+                        console.log("USER HAS SUBSCRIPTION");
+                        $scope.advanceState($scope.StateType.SUBSCRIPTION_FOUND);
+                    }
+                }
+            );
         };
-        $scope.buyOneMonthSubscription = function() { $scope._buy(PURCHASE_ID_ONE_MONTH); };
-        $scope.buyOneYearSubscription = function() { $scope._buy(PURCHASE_ID_ONE_YEAR); };
-        $scope.buyLifetime = function() { $scope._buy(PURCHASE_ID_LIFETIME); };
+
+        $scope.wantsLocalOnly = function() {
+            g_local_account_only = true;
+            console.log("User indicated they want local only!");
+            UserService.login(LOCAL_USER);
+            $state.go("app.dates");
+        };
 
         $scope.getDatesChunked = function() {
             var chunks = [];

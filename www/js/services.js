@@ -49,16 +49,13 @@ angular.module('BeerCellarApp.services', [])
              * @returns {*}
              */
             activeUser: function () {
-                if(currentUser === null) {
-                    if(g_local_account_only) {
-                        console.log("Refreshing active user (local only)");
-                        currentUser = User.build({username: 'local', _id: 'local'});
-                    } else {
-                        console.log("Refreshing active user from Kinvey");
-                        currentUser = User.build($kinvey.getActiveUser());
-                    }
+                if(currentUser === null && !g_local_account_only) {
+                    console.log("Refreshing active user from Kinvey");
+                    currentUser = User.build($kinvey.getActiveUser());
                 }
-                uuid = currentUser.username;
+                if(currentUser !== null) {
+                    uuid = currentUser.username;
+                }
                 return currentUser;
             },
             /**
@@ -67,22 +64,28 @@ angular.module('BeerCellarApp.services', [])
              * @returns {*} promise to do the login
              */
             login: function (_username, _password) {
-                //Kinvey login starts
-                console.log("Logging in user ", _username);
-                var promise = $kinvey.User.login({
-                    username: _username,
-                    password: _password
-                });
+                if(_username === LOCAL_USER) {
+                    currentUser = User.build({username: LOCAL_USER, _id: LOCAL_USER});
+                    g_local_account_only = true;
+                    return function() {};
+                } else {
+                    //Kinvey login starts
+                    console.log("Logging in user ", _username);
+                    var promise = $kinvey.User.login({
+                        username: _username,
+                        password: _password
+                    });
 
-                promise.then(function (response) {
-                    g_local_account_only = false;
-                    return User.build(response);
-                }, function (error) {
-                    //Kinvey login finished with error
-                    console.log("Error logging in: " + error.description);
-                });
+                    promise.then(function (response) {
+                        g_local_account_only = false;
+                        return User.build(response);
+                    }, function (error) {
+                        //Kinvey login finished with error
+                        console.log("Error logging in: " + error.description);
+                    });
 
-                return promise;
+                    return promise;
+                }
             },
 
             /**

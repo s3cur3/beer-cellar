@@ -13,7 +13,7 @@ var PURCHASE_ID_LIFETIME = "com.cisoftware.beercellar.lifetime";
 
 var g_billing_initialized = false;
 var g_local_account_only = true;
-
+var LOCAL_USER = 'local'; // local user username/ID
 
 
 function androidCheckSubscriptions() {
@@ -50,6 +50,27 @@ function checkSubscriptions(hasSubscriptionObj) {
         };
     }
 }
+
+function purchase(productID) {
+    if(ionic.Platform.isAndroid() && typeof inappbilling !== "undefined") {
+        inappbilling.buy(function(data) {
+                console.log("BILLING: purchased " + productID);
+            }, function(errorBuy) {
+                console.error("BILLING: Error purchasing " + productID, errorBuy);
+            },
+            productID);
+    } else {
+        alert("Purchasing not supported");
+        console.error("Buying not supported.");
+        console.error("Platform is Android:", ionic.Platform.isAndroid());
+        console.error("IAB:", inappbilling);
+    }
+}
+
+buyOneMonthSubscription = function() { purchase(PURCHASE_ID_ONE_MONTH); };
+buyOneYearSubscription = function() { purchase(PURCHASE_ID_ONE_YEAR); };
+buyLifetime = function() { purchase(PURCHASE_ID_LIFETIME); };
+
 
 
 
