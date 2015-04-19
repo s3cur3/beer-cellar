@@ -77,7 +77,7 @@ beerCellarApp
     .run(['$ionicPlatform', '$ionicHistory', function ($ionicPlatform, $ionicHistory) {
         function initBilling() {
             g_billing_initialized = false;
-            g_local_account_only = true;
+            window.localStorage[STORAGE_KEY_LOCAL_ONLY] = TRUE;
 
             if(ionic.Platform.isAndroid()) {
                 //

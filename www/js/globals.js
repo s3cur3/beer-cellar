@@ -12,7 +12,11 @@ var PURCHASE_ID_ONE_YEAR = "com.cisoftware.beercellar.oneyear";
 var PURCHASE_ID_LIFETIME = "com.cisoftware.beercellar.lifetime";
 
 var g_billing_initialized = false;
-var g_local_account_only = true;
+var STORAGE_KEY_LOCAL_ONLY = 'local_account_only';
+var TRUE = 'true'; // local storage accepts only strings!
+var FALSE = 'false';
+var STORAGE_KEY_BEERS = 'beers';
+window.localStorage[STORAGE_KEY_LOCAL_ONLY] = TRUE;
 var LOCAL_USER = 'local'; // local user username/ID
 
 
@@ -25,7 +29,7 @@ function androidCheckSubscriptions() {
                         product.productId == PURCHASE_ID_ONE_YEAR ||
                         product.productId == PURCHASE_ID_LIFETIME) {
                     console.log("EXCELLENT! User has subscription:", product.productId);
-                    g_local_account_only = false;
+                    window.localStorage[STORAGE_KEY_LOCAL_ONLY] = FALSE;
                 }
             }
         },

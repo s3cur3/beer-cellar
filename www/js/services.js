@@ -49,7 +49,7 @@ angular.module('BeerCellarApp.services', [])
              * @returns {*}
              */
             activeUser: function () {
-                if(currentUser === null && !g_local_account_only) {
+                if(currentUser === null && window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== TRUE) {
                     console.log("Refreshing active user from Kinvey");
                     currentUser = User.build($kinvey.getActiveUser());
                 }
@@ -66,7 +66,7 @@ angular.module('BeerCellarApp.services', [])
             login: function (_username, _password) {
                 if(_username === LOCAL_USER) {
                     currentUser = User.build({username: LOCAL_USER, _id: LOCAL_USER});
-                    g_local_account_only = true;
+                    window.localStorage[STORAGE_KEY_LOCAL_ONLY] = TRUE;
                     return function() {};
                 } else {
                     //Kinvey login starts
@@ -77,7 +77,7 @@ angular.module('BeerCellarApp.services', [])
                     });
 
                     promise.then(function (response) {
-                        g_local_account_only = false;
+                        window.localStorage[STORAGE_KEY_LOCAL_ONLY] = FALSE;
                         return User.build(response);
                     }, function (error) {
                         //Kinvey login finished with error
@@ -92,9 +92,14 @@ angular.module('BeerCellarApp.services', [])
              * @returns {*} promise to perform the logout
              */
             logout: function() {
-                var user = $kinvey.getActiveUser();
-                if(user !== null) {
-                    return $kinvey.User.logout();
+                if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] === TRUE) {
+                    currentUser = null;
+                    return function() {};
+                } else {
+                    var user = $kinvey.getActiveUser();
+                    if(user !== null) {
+                        return $kinvey.User.logout();
+                    }
                 }
             },
 
@@ -213,10 +218,12 @@ angular.module('BeerCellarApp.services', [])
     .factory('BeerService', function ($kinvey, Beer) {
         var DEBUG_BEER_SERVICE = true;
         return {
+            _beers: JSON.parse(window.localStorage[STORAGE_KEY_BEERS] || '{}'),
+
             /**
              * Search for a particular beer in the database
              * @param _id {string} The ID of the beer to search for
-             * @return {*} A promise to return the sought beer
+             * @return {Beer} The sought beer, if applicable
              */
             find: function(_id) {
                 assert(typeof _id === "string", "Sought ID is not a string");
@@ -226,35 +233,42 @@ angular.module('BeerCellarApp.services', [])
 
                 if(DEBUG_BEER_SERVICE) console.log("Finding beer with ID", _id);
 
-                if(_id === null || typeof _id === "undefined") {
-                    assert(typeof _id === "string", "Beer ID was not a string");
-                    return Beer.buildPromise();
-                } else {
-                    return $kinvey.DataStore.get('beers', _id)
-                        .then(function(beer) {
-                            if(typeof beer.purchaseDate === "string") {
-                                beer.purchaseDate = DateMath.dateObjFromString(beer.purchaseDate);
-                            }
-                            return beer;
-                        });
+                for(var i = 0; i < this._beers.length; i++) {
+                    if(this._beers[i]._id === _id) {
+                        if(typeof beer.purchaseDate === "string") {
+                            beer.purchaseDate = DateMath.dateObjFromString(beer.purchaseDate);
+                        }
+                        return this._beers[i];
+                    }
                 }
             },
 
             /**
              * Deletes a beer from the database
              * @param {Beer} beer The beer to delete
-             * @returns {*} a promise to destroy the beer
              */
             remove: function(beer) {
                 if(DEBUG_BEER_SERVICE) console.log("Deleting beer", beer);
                 deletedIDs.push(beer._id);
-                return $kinvey.DataStore.destroy('beers', beer._id);
+
+                // Delete from local storage
+                for(var i = 0; i < this._beers.length; i++) {
+                    if(this._beers[i]._id === beer._id) {
+                        this._beers.splice(i, 1);
+                        break;
+                    }
+                }
+
+                // Delete from the DB
+                if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== TRUE) {
+                    $kinvey.DataStore.destroy(STORAGE_KEY_BEERS, beer._id);
+                }
             },
 
             /**
-             * Saves a beer to the database
+             * Saves a beer to the database. This works asynchronously---we *instantly* save it to the local storage,
+             * then in the background we do the store to Kinvey (as necessary).
              * @param {Beer} beer The beer you'd like to save
-             * @returns {*} a promise to save the beer
              */
             save: function(beer) {
                 if(DEBUG_BEER_SERVICE) console.log("Saving beer", beer);
@@ -263,29 +277,39 @@ angular.module('BeerCellarApp.services', [])
                         then: function() {}
                     };
                 } else {
-                    return $kinvey.DataStore.save('beers', beer);
+                    this._beers.push(beer);
+                    window.localStorage[STORAGE_KEY_BEERS] = JSON.stringify(this._beers);
+                    if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== TRUE) {
+                        $kinvey.DataStore.save(STORAGE_KEY_BEERS, beer);
+                    }
                 }
 
             },
 
             /**
-             * Fetches all beers in this user's collection
+             * Fetches all beers in this user's collection. Works asynchronously, so that we instantly return what's in the
+             * local storage, then update from Kinvey in the background.
              * @returns {*} a promise to get all the beers
              */
             all: function() {
                 if(DEBUG_BEER_SERVICE) console.log("Getting all beers");
-                return $kinvey.DataStore.find('beers')
-                    .then(function(beers) {
-                        for(var i = 0; i < beers.length; i++) {
-                            if(typeof beers[i].purchaseDate === "string") {
-                                beers[i].purchaseDate = DateMath.dateObjFromString(beers[i].purchaseDate);
+                var _this = this;
+                if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== TRUE) {
+                    $kinvey.DataStore.find(STORAGE_KEY_BEERS)
+                        .then(function(beers) {
+                            for(var i = 0; i < beers.length; i++) {
+                                if(typeof beers[i].purchaseDate === "string") {
+                                    beers[i].purchaseDate = DateMath.dateObjFromString(beers[i].purchaseDate);
+                                }
                             }
-                        }
-                        return beers;
-                    });
+                            _this._beers = beers;
+                        });
+                }
+                return this._beers;
             },
 
             clean: function() {
+                // TODO: Local-only equivalent?
                 var query = new $kinvey.Query();
                 query.equalTo('name', undefined).equalTo('brewery', undefined);
 
@@ -293,23 +317,23 @@ angular.module('BeerCellarApp.services', [])
                 secondQuery.equalTo('name', 'New beer').equalTo('brewery', 'Unknown');
                 query.or(secondQuery);
 
-                return $kinvey.DataStore.clean('beers', query);
+                return $kinvey.DataStore.clean(STORAGE_KEY_BEERS, query);
             },
 
             /**
              * @param {Beer=} optionalBeerToClone Clone the name, brewery, etc. from this beer
-             * @return {*} A promise to create a new beer object
              */
             create: function(optionalBeerToClone) {
                 if(DEBUG_BEER_SERVICE) console.log("Created new beer");
                 var b = Beer.build(optionalBeerToClone);
-                return this.save(b);
+                this.save(b);
             },
 
             /**
-             * @return {*} A promise to retrieve the beer that was last accessed/modified by the user
+             * @return {Beer} The beer that was last accessed/modified by the user
              */
             lastActive: function() {
+                // TODO: Local-only equivalent?
                 if(DEBUG_BEER_SERVICE) console.log("Getting last active beer");
 
                 var lastActive = window.localStorage['lastActiveBeerID'];
@@ -317,7 +341,7 @@ angular.module('BeerCellarApp.services', [])
                 if(lastActive === undefined ||
                     lastActive == null ||
                     typeof lastActive == "undefined") {
-                    return Beer.buildPromise();
+                    return Beer.build();
                 }
 
                 return this.find(lastActive);

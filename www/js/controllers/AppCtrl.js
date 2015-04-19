@@ -17,7 +17,7 @@ angular.module('BeerCellarApp.controllers.AppCtrl', [])
         };
 
         $scope.wantsLocalOnly = function() {
-            g_local_account_only = true;
+            window.localStorage[STORAGE_KEY_LOCAL_ONLY] = TRUE;
             console.log("User indicated they want local only!");
             UserService.login(LOCAL_USER);
             $state.go("app.dates");
