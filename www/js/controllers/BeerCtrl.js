@@ -10,7 +10,7 @@ angular.module('BeerCellarApp.controllers.BeerCtrl', [])
         var foundBeerObj = BeerService.find(theID);
         if(foundBeerObj) {
             console.log("Selecting beer", foundBeerObj);
-            $scope.selectBeer(beer);
+            $scope.selectBeer(foundBeerObj);
         } else {
             console.error("Couldn't find requested beer in BeerCtrl");
         }

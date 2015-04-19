@@ -240,12 +240,13 @@ angular.module('BeerCellarApp.services', [])
 
                 for(var i = 0; i < this._beers.length; i++) {
                     if(this._beers[i]._id === _id) {
-                        if(typeof beer.purchaseDate === "string") {
-                            beer.purchaseDate = DateMath.dateObjFromString(beer.purchaseDate);
+                        if(typeof this._beers[i].purchaseDate === "string") {
+                            this._beers[i].purchaseDate = DateMath.dateObjFromString(this._beers[i].purchaseDate);
                         }
                         return this._beers[i];
                     }
                 }
+                console.log("Failed to find beer with ID", _id);
                 return null;
             },
 
