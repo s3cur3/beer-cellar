@@ -128,7 +128,7 @@ angular.module('BeerCellarApp.controllers.AppCtrl', [])
         $scope.selectBeer = function(theBeer) {
             console.log("Selecting beer", theBeer);
             $scope.beer = theBeer;
-            return BeerService.setLastActiveBeer(theBeer);
+            BeerService.setLastActiveBeer(theBeer);
         };
 
         /**
@@ -136,60 +136,55 @@ angular.module('BeerCellarApp.controllers.AppCtrl', [])
          * @return {*} A promise to update the beers
          */
         $scope.updateBeers = function(updateLastActive) {
-            console.log("$scope.updateBeers()");
-            return BeerService.all().then(function(allBeers) {
-                console.log("Updated $scope.beers to:", allBeers);
-                $scope.beers = allBeers;
+            $scope.beers = BeerService.all();
+            console.log("$scope.updateBeers(): Updated $scope.beers to:", $scope.beers);
 
-                $scope.beersChunkedByDate = $scope.getDatesChunked();
-                console.log("Chunked by date:", $scope.beersChunkedByDate);
+            $scope.beersChunkedByDate = $scope.getDatesChunked();
+            console.log("Chunked by date:", $scope.beersChunkedByDate);
 
-                $scope.beersChunkedByStyle = $scope.getStylesChunked();
-                console.log("Chunked by style:", $scope.beersChunkedByStyle);
+            $scope.beersChunkedByStyle = $scope.getStylesChunked();
+            console.log("Chunked by style:", $scope.beersChunkedByStyle);
 
-                $scope.beersChunkedByName = $scope.getNamesChunked();
-                console.log("Chunked by name:", $scope.beersChunkedByName);
+            $scope.beersChunkedByName = $scope.getNamesChunked();
+            console.log("Chunked by name:", $scope.beersChunkedByName);
 
-                $scope.beersChunkedByBrewery = $scope.getBreweriesChunked();
-                console.log("Chunked by brewery:", $scope.beersChunkedByBrewery);
+            $scope.beersChunkedByBrewery = $scope.getBreweriesChunked();
+            console.log("Chunked by brewery:", $scope.beersChunkedByBrewery);
 
-                $scope.knownBreweries = Object.keys($scope.beersChunkedByBrewery).sort();
-                $scope.knownBeerNames = Object.keys($scope.beersChunkedByName).sort();
+            $scope.knownBreweries = Object.keys($scope.beersChunkedByBrewery).sort();
+            $scope.knownBeerNames = Object.keys($scope.beersChunkedByName).sort();
 
-                if(updateLastActive) {
-                    BeerService.lastActive().then(function(b) {
-                        $scope.beer = b;
-                    });
-                }
+            if(updateLastActive) {
+                $scope.beer = BeerService.lastActive();
+            }
 
-                // Update our stats
-                $scope.stats.bottles = 0;
-                $scope.stats.meanYears = 0;
-                for(var i = 0; i < $scope.beers.length; i++) {
-                    var b = $scope.beers[i];
-                    $scope.stats.bottles += b.quantity;
-                    $scope.stats.meanYears += b.drinkAfterYears;
-                }
-                $scope.stats.meanYears = $scope.stats.meanYears / $scope.beers.length;
-                $scope.stats.names = Object.keys($scope.beersChunkedByName).length;
-                $scope.stats.breweries = Object.keys($scope.beersChunkedByBrewery).length;
-                $scope.stats.entries = $scope.beers.length;
-            });
+            // Update our stats
+            $scope.stats.bottles = 0;
+            $scope.stats.meanYears = 0;
+            for(var i = 0; i < $scope.beers.length; i++) {
+                var b = $scope.beers[i];
+                $scope.stats.bottles += b.quantity;
+                $scope.stats.meanYears += b.drinkAfterYears;
+            }
+            $scope.stats.meanYears = $scope.stats.meanYears / $scope.beers.length;
+            $scope.stats.names = Object.keys($scope.beersChunkedByName).length;
+            $scope.stats.breweries = Object.keys($scope.beersChunkedByBrewery).length;
+            $scope.stats.entries = $scope.beers.length;
         };
 
         $scope.addBeer = function(optionalBeerToClone) {
             console.log("Adding beer");
-            if(optionalBeerToClone) console.log("Clone of:", optionalBeerToClone);
-            BeerService.create(optionalBeerToClone).then(function(b) {
-                $scope.selectBeer(b); // synchronous
-                $scope.updateBeers().then(function() {
-                    BeerService.lastActive().then(function(beer) {
-                        console.log("Setting path to /#/beers/" + beer._id);
-                        $scope.beer = beer;
-                        $location.path('app/beers/' + beer._id);
-                    });
-                });
-            });
+
+            if(optionalBeerToClone) { // first save the thing we're working on now
+                console.log("Clone of:", optionalBeerToClone);
+                BeerService.save(optionalBeerToClone);
+            }
+            var b = BeerService.create(optionalBeerToClone);
+            $scope.selectBeer(b); // synchronously sets $scope.beer to b, and makes b the last active beer
+            $scope.updateBeers();
+
+            console.log("Setting path to /#/beers/" + b._id);
+            $location.path('app/beers/' + b._id);
         };
 
         $scope.navigateToBrewery = function(brewery) {
@@ -207,14 +202,9 @@ angular.module('BeerCellarApp.controllers.AppCtrl', [])
                 assert(typeof $scope.beer === "object");
 
                 if($scope.beer && $scope.beer.name && $scope.beer.name != "New beer") {
-                    BeerService.save($scope.beer).then(function(beer) {
-                        console.log("Saved beer from promise is:", beer);
-                        $scope.beer = beer;
-                        $scope.updateBeers();
-                    }, function() {
-                        console.log("Failed to save beer! Trying again...");
-                        $scope.saveModifiedBeer();
-                    });
+                    BeerService.save($scope.beer);
+                    console.log("Saved beer", $scope.beer);
+                    $scope.updateBeers();
                 }
             }
         };
@@ -249,7 +239,8 @@ angular.module('BeerCellarApp.controllers.AppCtrl', [])
             console.error("Not logged in!");
             $location.url('/init');
             setTimeout(function(){
-                console.error($location.path());
+                console.error("No active user, so you can't visit:", $location.path());
+                console.log("User was:", UserService.activeUser());
                 $location.url('/init');
             }, 1000);
         }
@@ -258,23 +249,17 @@ angular.module('BeerCellarApp.controllers.AppCtrl', [])
             console.log("Attempting to update $scope.activeUser");
             if(!$scope.activeUser) {
                 $scope.activeUser = UserService.activeUser();
-            }
-            if(!$scope.activeUser) {
-                setTimeout($scope.tryUpdatingActiveUser, 2000);
+
+                if(!$scope.activeUser) {
+                    setTimeout($scope.tryUpdatingActiveUser, 2000);
+                }
             }
         };
         $scope.tryUpdatingActiveUser();
 
 
         console.log("Calling for initial update of beers");
-        $scope.updateBeers(true).then(function() {
-            console.log("Succeeded updating beers!");
-        }, function(errorObj) {
-            console.error("Failed to update beers initially!\n" + errorObj.name + ": " + errorObj.description, errorObj);
-            if(errorObj.name === Kinvey.Error.DATABASE_ERROR) {
-                console.log("Was a DB error");
-            }
-        });
+        $scope.updateBeers(true);
 
 
         // Set up purchases
@@ -336,13 +321,10 @@ angular.module('BeerCellarApp.controllers.AppCtrl', [])
         };
         $scope._delete = function() {
             $scope.deleteModal.hide();
-            BeerService.remove($scope.beerToDelete).then(function() {
-                $scope.updateBeers(true);
-                $scope.beer = {};
-                $location.path('app/dates');
-            }, function() {
-                console.error("Failed to delete beer!", $scope.beerToDelete);
-            });
+            BeerService.remove($scope.beerToDelete);
+            $scope.updateBeers(true);
+            $scope.beer = {};
+            $location.path('app/dates');
         };
         // No popup, just do the deletion
         $scope.seriouslyDelete = function(beer) {

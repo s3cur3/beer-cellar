@@ -49,9 +49,14 @@ angular.module('BeerCellarApp.services', [])
              * @returns {*}
              */
             activeUser: function () {
-                if(currentUser === null && window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== TRUE) {
-                    console.log("Refreshing active user from Kinvey");
-                    currentUser = User.build($kinvey.getActiveUser());
+                if(currentUser === null) {
+                    if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] === FALSE) {
+                        console.log("Refreshing active user from Kinvey");
+                        currentUser = User.build($kinvey.getActiveUser());
+                    } else if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] === TRUE) {
+                        console.log("User's prefs specified local only user... creating it now");
+                        currentUser = User.build({username: LOCAL_USER, _id: LOCAL_USER});
+                    }
                 }
                 if(currentUser !== null) {
                     uuid = currentUser.username;
@@ -218,12 +223,12 @@ angular.module('BeerCellarApp.services', [])
     .factory('BeerService', function ($kinvey, Beer) {
         var DEBUG_BEER_SERVICE = true;
         return {
-            _beers: JSON.parse(window.localStorage[STORAGE_KEY_BEERS] || '{}'),
+            _beers: JSON.parse(window.localStorage[STORAGE_KEY_BEERS] || '[]'),
 
             /**
              * Search for a particular beer in the database
              * @param _id {string} The ID of the beer to search for
-             * @return {Beer} The sought beer, if applicable
+             * @return {Beer|null} The sought beer, if applicable
              */
             find: function(_id) {
                 assert(typeof _id === "string", "Sought ID is not a string");
@@ -241,6 +246,7 @@ angular.module('BeerCellarApp.services', [])
                         return this._beers[i];
                     }
                 }
+                return null;
             },
 
             /**
@@ -260,7 +266,7 @@ angular.module('BeerCellarApp.services', [])
                 }
 
                 // Delete from the DB
-                if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== TRUE) {
+                if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] === FALSE) {
                     $kinvey.DataStore.destroy(STORAGE_KEY_BEERS, beer._id);
                 }
             },
@@ -279,7 +285,7 @@ angular.module('BeerCellarApp.services', [])
                 } else {
                     this._beers.push(beer);
                     window.localStorage[STORAGE_KEY_BEERS] = JSON.stringify(this._beers);
-                    if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== TRUE) {
+                    if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] === FALSE) {
                         $kinvey.DataStore.save(STORAGE_KEY_BEERS, beer);
                     }
                 }
@@ -294,7 +300,7 @@ angular.module('BeerCellarApp.services', [])
             all: function() {
                 if(DEBUG_BEER_SERVICE) console.log("Getting all beers");
                 var _this = this;
-                if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== TRUE) {
+                if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] === FALSE) {
                     $kinvey.DataStore.find(STORAGE_KEY_BEERS)
                         .then(function(beers) {
                             for(var i = 0; i < beers.length; i++) {
@@ -322,18 +328,19 @@ angular.module('BeerCellarApp.services', [])
 
             /**
              * @param {Beer=} optionalBeerToClone Clone the name, brewery, etc. from this beer
+             * @return {Beer} the beer object that was created
              */
             create: function(optionalBeerToClone) {
                 if(DEBUG_BEER_SERVICE) console.log("Created new beer");
                 var b = Beer.build(optionalBeerToClone);
                 this.save(b);
+                return b;
             },
 
             /**
              * @return {Beer} The beer that was last accessed/modified by the user
              */
             lastActive: function() {
-                // TODO: Local-only equivalent?
                 if(DEBUG_BEER_SERVICE) console.log("Getting last active beer");
 
                 var lastActive = window.localStorage['lastActiveBeerID'];

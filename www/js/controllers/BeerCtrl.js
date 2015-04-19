@@ -7,13 +7,13 @@ angular.module('BeerCellarApp.controllers.BeerCtrl', [])
         var re = /[^\/]+$/; // matches everything from the last / to the end of the string
         var theID = $location.url().match(re)[0];
 
-        console.log("Selecting beer", theID);
-        BeerService.find(theID).then(function(beer) {
-            console.log("Found it!");
+        var foundBeerObj = BeerService.find(theID);
+        if(foundBeerObj) {
+            console.log("Selecting beer", foundBeerObj);
             $scope.selectBeer(beer);
-        }, function(err) {
-            console.error("Error retrieving selected beer:", err);
-        });
+        } else {
+            console.error("Couldn't find requested beer in BeerCtrl");
+        }
 
         // Update the master beer list right before we leave this controller
         $scope.$on('$locationChangeStart', function(event, next, current) {

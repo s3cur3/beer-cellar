@@ -16,7 +16,10 @@ var STORAGE_KEY_LOCAL_ONLY = 'local_account_only';
 var TRUE = 'true'; // local storage accepts only strings!
 var FALSE = 'false';
 var STORAGE_KEY_BEERS = 'beers';
-window.localStorage[STORAGE_KEY_LOCAL_ONLY] = TRUE;
+if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== TRUE && window.localStorage[STORAGE_KEY_LOCAL_ONLY] !== FALSE) {
+    // Set to true for first-run experience
+    window.localStorage[STORAGE_KEY_LOCAL_ONLY] = TRUE;
+}
 var LOCAL_USER = 'local'; // local user username/ID
 
 

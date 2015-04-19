@@ -1,11 +1,13 @@
 
 // selects the desired state chnage behavior depending on whether the user is logged or not
 function determineKinveyBehavior($window, activeUser) {
-    if(activeUser === null || !activeUser) {
-        console.log("Redirecting to init");
-        $window.location = '#/init';
-    } else if($window.location.toString().indexOf('init') > -1) {
-        $window.location = 'app/dates';
+    if(window.localStorage[STORAGE_KEY_LOCAL_ONLY] === FALSE) { // user specified they want to sync
+        if(activeUser === null || !activeUser) {
+            console.log("Redirecting to init");
+            $window.location = '#/init';
+        } else if($window.location.toString().indexOf('init') > -1) {
+            $window.location = 'app/dates';
+        }
     }
 }
 
@@ -49,7 +51,7 @@ $injector.invoke(["$kinvey", "$window", "$rootScope", function($kinvey, $window,
 
         angular.bootstrap(document, ['BeerCellarApp']);
 
-        uuid = activeUser ? activeUser.username : 'local';
+        uuid = activeUser ? activeUser.username : LOCAL_USER;
 
         determineKinveyBehavior($window, activeUser);
 
@@ -357,6 +359,8 @@ angular.module('BeerCellarFilters', [])
          * @param beerList An array of BeerService _Beer objects
          */
         return function(beerList) {
+            assert(Array.isArray(beerList), "Expected beer list to be an array in filter sortDates");
+
             beerList.sort(function(beer1, beer2) {
                 if(typeof beer1.purchaseDate === "string") {
                     console.log("Got a string date (that's wierd...). Obj was:", beer1);
